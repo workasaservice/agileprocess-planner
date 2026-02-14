@@ -5,9 +5,6 @@
   "bin": {
     "ops360-ai": "dist/cli.js"
   },
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "cli": "ts-node src/cli.ts",
@@ -18,7 +15,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "AgileProcess Planner agent (Ops360-AI).",
+  "description": "AgileProcess Planner agent (AgilePlanner).",
   "dependencies": {
     "axios": "^1.13.5",
     "dotenv": "^17.2.4"

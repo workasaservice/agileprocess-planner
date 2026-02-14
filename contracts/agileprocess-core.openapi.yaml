@@ -1,0 +1,284 @@
+openapi: 3.0.3
+info:
+  title: AgileProcess Core Public API (APIM)
+  version: 1.0.0
+  description: Public contract for the AgileProcess Core planning endpoints exposed via APIM.
+servers:
+  - url: https://{apimHost}
+    description: APIM gateway host
+    variables:
+      apimHost:
+        default: apim.example.com
+security:
+  - ApiKeyAuth: []
+paths:
+  /api/plan/requirements-to-backlog:
+    post:
+      summary: Generate backlog plan from requirements text
+      operationId: planRequirementsToBacklog
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequirementsToBacklogRequest"
+      responses:
+        "200":
+          description: Backlog plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BacklogPlan"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /api/plan/feature-to-stories:
+    post:
+      summary: Break a feature into stories and optional tasks
+      operationId: planFeatureToStories
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeatureToStoriesRequest"
+      responses:
+        "200":
+          description: Feature plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlannedFeature"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /api/plan/story-to-tasks:
+    post:
+      summary: Break a story into tasks
+      operationId: planStoryToTasks
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StoryToTasksRequest"
+      responses:
+        "200":
+          description: Story plan with tasks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlannedStory"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /api/plan/sprint:
+    post:
+      summary: Suggest a sprint plan based on goal and capacity
+      operationId: planSprint
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SprintPlanRequest"
+      responses:
+        "200":
+          description: Sprint plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SprintPlan"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/ServerError"
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Missing or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    RequirementsToBacklogRequest:
+      type: object
+      properties:
+        requirementText:
+          type: string
+          description: Raw requirements text
+        options:
+          $ref: "#/components/schemas/PlanningOptions"
+      required:
+        - requirementText
+    FeatureToStoriesRequest:
+      type: object
+      properties:
+        featureTitle:
+          type: string
+        featureDescription:
+          type: string
+        includeTasks:
+          type: boolean
+          default: false
+      required:
+        - featureTitle
+    StoryToTasksRequest:
+      type: object
+      properties:
+        storyTitle:
+          type: string
+        storyDescription:
+          type: string
+        acceptanceCriteria:
+          type: array
+          items:
+            type: string
+      required:
+        - storyTitle
+    SprintPlanRequest:
+      type: object
+      properties:
+        goal:
+          type: string
+        capacity:
+          type: number
+          format: double
+        backlogItemIds:
+          type: array
+          items:
+            type: string
+      required:
+        - goal
+        - capacity
+    PlanningOptions:
+      type: object
+      properties:
+        project:
+          type: string
+        includeTasks:
+          type: boolean
+          default: true
+        includeEstimates:
+          type: boolean
+          default: true
+    BacklogPlan:
+      type: object
+      properties:
+        features:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlannedFeature"
+      required:
+        - features
+    PlannedFeature:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        stories:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlannedStory"
+      required:
+        - title
+        - stories
+    PlannedStory:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        acceptanceCriteria:
+          type: array
+          items:
+            type: string
+        estimate:
+          type: number
+          format: double
+        tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlannedTask"
+      required:
+        - title
+    PlannedTask:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        estimate:
+          type: number
+          format: double
+      required:
+        - title
+    SprintPlan:
+      type: object
+      properties:
+        committedItems:
+          type: array
+          items:
+            type: string
+        overflowItems:
+          type: array
+          items:
+            type: string
+        capacityUsed:
+          type: number
+          format: double
+      required:
+        - committedItems
+        - overflowItems
+        - capacityUsed
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message

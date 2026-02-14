@@ -1,4 +1,4 @@
-# Ops360-AI
+# AgilePlanner
 
 AgileProcess Planner agent for turning requirements, features, and sprint goals into backlog-ready output.
 
@@ -31,7 +31,8 @@ These handlers are available via `activateAgent()`:
 - `plan-feature`
 - `plan-sprint`
 
-Example payloads are in [docs/usage-guide.md](docs/usage-guide.md).
+Public API contract is in contracts/agileprocess-core.openapi.yaml.
+Detailed usage docs are maintained in the private AgileProcessCore repo.
 
 ## Development
 - Build: `npm run build`
@@ -40,6 +41,10 @@ Example payloads are in [docs/usage-guide.md](docs/usage-guide.md).
 
 ## CLI
 After building, you can run:
+```
+ops360-ai --help
+```
+The CLI binary name remains ops360-ai until the package is renamed.
 ```
 ops360-ai plan-backlog '{"requirements":"docs/Requirements.md"}'
 ```
