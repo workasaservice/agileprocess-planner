@@ -1,6 +1,0 @@
-{
-	"serverUrl": "https://dev.azure.com/workasaservice",
-	"token": "${AZURE_DEVOPS_PAT}",
-	"org": "workasaservice",
-	"project": "Automate"
-}
