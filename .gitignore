@@ -9,3 +9,19 @@ yarn-error.log*
 pnpm-debug.log*
 dist/
 coverage/
+
+# MCP Configuration - contains credentials
+mcp/azure-devops.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+
+# Docs
+docs/mcp/azure-devops.json
