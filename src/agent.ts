@@ -6,6 +6,9 @@ import { createBacklogItems } from "./handlers/createBacklogItems";
 import { createSprintItems } from "./handlers/createSprintItems";
 import { planFeature } from "./handlers/planFeature";
 import { planSprint } from "./handlers/planSprint";
+import { createUsers } from "./handlers/createUsers";
+import { assignUsersToGroups } from "./handlers/assignUsersToGroups";
+import { assignUsersToDevOpsTeams } from "./handlers/assignUsersToDevOpsTeams";
 
 dotenv.config();
 
@@ -88,6 +91,9 @@ async function routeCommand(
     "plan-backlog": planBacklog,
     "plan-feature": planFeature,
     "plan-sprint": planSprint,
+    "create-users": createUsers,
+    "assign-users-to-groups": assignUsersToGroups,
+    "assign-users-to-devops-teams": assignUsersToDevOpsTeams,
   };
 
   // Check if command is registered
@@ -152,6 +158,15 @@ export async function activateAgent(): Promise<any> {
       },
       "plan-sprint": async (input: any) => {
         return await planSprint(input);
+      },
+      "create-users": async (input: any) => {
+        return await createUsers(input);
+      },
+      "assign-users-to-groups": async (input: any) => {
+        return await assignUsersToGroups(input);
+      },
+      "assign-users-to-devops-teams": async (input: any) => {
+        return await assignUsersToDevOpsTeams(input);
       },
     },
   };

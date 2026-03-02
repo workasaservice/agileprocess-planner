@@ -44,10 +44,28 @@ type CreatedItem = {
 // ─── Intent Detection ────────────────────────────────────────────────────────
 
 interface DetectedIntent {
-  action: "create";
+  action: "create" | "create-users" | "assign-users";
   workItemType: WorkItemType;
   jsonFilePath: string | null;
   iterationPath: string | null;
+}
+
+// Check if the prompt is about Azure AD user management (not work items)
+function isUserManagementIntent(prompt: string): boolean {
+  const lower = prompt.toLowerCase();
+  const userKeywords = [
+    "azure ad user",
+    "azure ad account",
+    "entra user",
+    "entra id user",
+    "aad user",
+    "create user account",
+    "add user to",
+    "assign user to",
+    "provision user"
+  ];
+  
+  return userKeywords.some(keyword => lower.includes(keyword));
 }
 
 const WORK_ITEM_TYPE_MAP: Record<string, WorkItemType> = {
@@ -316,6 +334,28 @@ async function main() {
 
   // Use a default prompt if only --file was given
   const effectivePrompt = prompt || "Create user stories from provided JSON";
+
+  // Check if this is a user management request
+  if (isUserManagementIntent(effectivePrompt)) {
+    console.log("");
+    console.log("  🔍 Detected Azure AD user management request");
+    console.log("  ─────────────────────────────────────────────");
+    console.log("");
+    console.log("  For Azure AD user management, please use:");
+    console.log("");
+    console.log("  Create users:");
+    console.log('    npm run cli create-users --file users.json');
+    console.log("");
+    console.log("  Assign users to Azure AD groups:");
+    console.log('    npm run cli assign-users-to-groups --file users.json');
+    console.log("");
+    console.log("  Assign users to Azure DevOps teams:");
+    console.log('    npm run cli assign-users-to-devops-teams --file users.json');
+    console.log("");
+    console.log("  See users.json.example for the file format.");
+    console.log("");
+    return;
+  }
 
   console.log("");
   console.log("  🚀 AgilePlanner — Smart Work Item Creator");

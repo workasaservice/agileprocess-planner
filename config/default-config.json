@@ -1,7 +1,17 @@
 {
 	"agent": {
 		"name": "AgileProcess Planner",
-		"commands": ["plan-backlog", "plan-feature", "plan-sprint"]
+		"commands": [
+			"plan-backlog",
+			"plan-feature",
+			"plan-sprint",
+			"create-devops-items",
+			"create-backlog-items",
+			"create-sprint-items",
+			"create-users",
+			"assign-users-to-groups",
+			"assign-users-to-devops-teams"
+		]
 	},
 	"agileCore": {
 		"baseUrl": "",
@@ -12,5 +22,11 @@
 			"planFeature": "/api/planner/plan-feature",
 			"planSprint": "/api/planner/plan-sprint"
 		}
+	},
+	"microsoftGraph": {
+		"tenantId": "",
+		"clientId": "",
+		"clientSecret": "",
+		"scope": "https://graph.microsoft.com/.default"
 	}
 }

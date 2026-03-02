@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "displayName": "Priyabrata Johnson",
+      "userPrincipalName": "priyabrata.johnson@workasaservice.ai",
+      "mailNickname": "priyabrata.johnson",
+      "givenName": "Priyabrata",
+      "surname": "johnson",
+      "jobTitle": "Software Engineer",
+      "department": "Engineering",
+      "usageLocation": "US",
+      "accountEnabled": true,
+      "password": "[Welcome]@2026!",
+      "forceChangePasswordNextSignIn": true
+    },
+    {
+      "displayName": "Priyabrata Martinez",
+      "userPrincipalName": "priyabrata.martinez@workasaservice.ai",
+      "mailNickname": "priyabrata.martinez",
+      "givenName": "Bpriyabratab",
+      "surname": "martinez",
+      "jobTitle": "Project Manager",
+      "department": "Product",
+      "usageLocation": "US",
+      "accountEnabled": true,
+      "password": "Welcome@2026!",
+      "forceChangePasswordNextSignIn": true
+    },
+    {
+      "displayName": "priyabrata Smith",
+      "userPrincipalName": "new.smith@workasaservice.ai",
+      "mailNickname": "priyarata.smith",
+      "givenName": "priyabrata",
+      "surname": "smith",
+      "jobTitle": "QA Engineer",
+      "department": "Quality Assurance",
+      "usageLocation": "US",
+      "accountEnabled": true,
+      "password": "Welcome@2026!",
+      "forceChangePasswordNextSignIn": true
+    }
+  ]
+}
