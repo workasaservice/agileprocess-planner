@@ -1,5 +1,6 @@
 node_modules/
 .DS_Store
+.venv
 .env
 .env.*
 *.log
@@ -25,3 +26,14 @@ Thumbs.db
 
 # Docs
 docs/mcp/azure-devops.json
+docs
+
+
+# User credentials - contains sensitive email addresses and passwords
+users.credentials.json
+
+.github
+
+mcp
+# Added by ggshield
+.cache_ggshield
