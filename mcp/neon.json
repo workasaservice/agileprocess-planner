@@ -1,0 +1,9 @@
+{
+  "name": "neon",
+  "transport": "http",
+  "url": "https://mcp.neon.tech/mcp",
+  "headers": {
+    "Authorization": "Bearer ${NEON_API_KEY}"
+  },
+  "notes": "Set NEON_API_KEY in your environment before using this MCP endpoint."
+}

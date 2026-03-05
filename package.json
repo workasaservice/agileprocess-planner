@@ -8,7 +8,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "cli": "ts-node src/cli.ts",
+    "db:e2e": "ts-node src/db/e2eCheck.ts",
     "db:migrate": "ts-node src/db/migrate.ts",
+    "db:migrate-json": "ts-node src/db/migrateJsonDocuments.ts",
     "db:seed": "ts-node src/db/seed.ts",
     "db:health": "ts-node src/db/healthcheck.ts",
     "go": "ts-node src/smartCli.ts",

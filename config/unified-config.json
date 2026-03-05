@@ -1,0 +1,163 @@
+{
+  "_comment": "Unified configuration for agent commands, services, and automation",
+  "_note": "Consolidates default-config.json and capacity-automation.json into single source of truth for all service configurations",
+  "agent": {
+    "name": "AgileProcess Planner",
+    "version": "1.0.0",
+    "description": "Automated agile process planning, user management, and capacity planning tool",
+    "commands": [
+      "plan-backlog",
+      "plan-feature",
+      "plan-sprint",
+      "create-devops-items",
+      "create-backlog-items",
+      "create-sprint-items",
+      "create-sprints",
+      "create-users",
+      "assign-users-to-groups",
+      "assign-users-to-devops-teams"
+    ]
+  },
+  "services": {
+    "agileCore": {
+      "description": "Agile Core planning service (external HTTP service)",
+      "baseUrl": "",
+      "apiKey": "",
+      "timeoutMs": 15000,
+      "endpoints": {
+        "planBacklog": "/api/planner/plan-backlog",
+        "planFeature": "/api/planner/plan-feature",
+        "planSprint": "/api/planner/plan-sprint"
+      }
+    },
+    "microsoftGraph": {
+      "description": "Microsoft Graph API for user and group management",
+      "tenantId": "",
+      "clientId": "",
+      "clientSecret": "",
+      "scope": "https://graph.microsoft.com/.default",
+      "endpoints": {
+        "users": "/v1.0/users",
+        "groups": "/v1.0/groups",
+        "groupMembers": "/v1.0/groups/{groupId}/members"
+      }
+    },
+    "azureDevOps": {
+      "description": "Azure DevOps MCP client for Agile planning",
+      "organization": "workasaservice",
+      "baseUrl": "https://dev.azure.com",
+      "apiVersion": "7.1-preview.1",
+      "mcp": {
+        "serverPath": "mcp/azure-devops.json",
+        "tools": [
+          "list-sprints",
+          "get-sprint",
+          "create-sprint",
+          "list-backlog-items",
+          "create-backlog-item",
+          "list-work-items",
+          "create-work-item"
+        ]
+      }
+    },
+    "neon": {
+      "description": "Neon MCP endpoint for Postgres management",
+      "database": "neondb",
+      "mcp": {
+        "serverPath": "mcp/neon.json",
+        "url": "https://mcp.neon.tech/mcp"
+      }
+    }
+  },
+  "sprints": {
+    "description": "Year-long sprint automation configuration",
+    "schedule": {
+      "startDate": "2026-03-09",
+      "endDate": "2026-12-31",
+      "sprintDurationWeeks": 2,
+      "workingDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "namingTemplate": "Sprint {date}",
+      "dateFormat": "YYYY-MM-DD"
+    },
+    "projects": [
+      {
+        "project": "MotherOps-Alpha",
+        "team": "MotherOps-Alpha Team",
+        "enabled": true
+      },
+      {
+        "project": "MotherOps-Beta",
+        "team": "MotherOps-Beta Team",
+        "enabled": true
+      }
+    ],
+    "execution": {
+      "dryRun": false,
+      "skipExisting": true,
+      "outputFile": "config/generated-iterations.json"
+    }
+  },
+  "policy": {
+    "_comment": "Enforcement policies for system architecture and security",
+    "api": {
+      "mcpOnly": true,
+      "description": "All external API calls must go through MCP servers, never direct HTTP/REST calls to Azure DevOps, Microsoft Graph, or other services",
+      "rationale": "MCP provides: authentication management, request logging, rate limiting, error handling, and audit trails",
+      "enforcement": "STRICT - violations will be caught at compile time and blocked at runtime",
+      "allowed": [
+        "azureDevOpsMcpClient.callTool()",
+        "microsoftGraphMcpClient.callTool()",
+        "agileCoreClient.callTool()"
+      ],
+      "prohibited": [
+        "axios.post/get/put/patch/delete direct to Azure DevOps",
+        "axios.post/get/put/patch/delete direct to Graph API",
+        "fetch(), curl, or any HTTP client bypassing MCP",
+        "Direct URL calls to https://dev.azure.com/*",
+        "Direct URL calls to https://graph.microsoft.com/*"
+      ]
+    }
+  },
+  "validation": {
+    "sprints": {
+      "requireMondayStart": true,
+      "requireFridayEnd": true,
+      "maxSprintsPerProject": 30
+    },
+    "users": {
+      "requiredFields": ["displayName", "userPrincipalName", "mailNickname"],
+      "optionalFields": ["givenName", "surname", "jobTitle", "department", "usageLocation"]
+    }
+  },
+  "security": {
+    "credentialsSeparation": {
+      "enabled": true,
+      "description": "Passwords stored in separate git-ignored users.credentials.json file",
+      "credentialsFile": "users.credentials.json"
+    },
+    "mcp_only_policy": {
+      "enabled": true,
+      "description": "All operational code uses MCP clients exclusively; no direct API calls",
+      "policy_document": "docs/MCP_ONLY_POLICY.md"
+    }
+  },
+  "configuration": {
+    "users": {
+      "source": "config/users.json",
+      "credentials": "users.credentials.json",
+      "linking": "userId field"
+    },
+    "roles": {
+      "source": "config/roles.json",
+      "linking": "roleId field"
+    },
+    "capacity": {
+      "source": "config/capacity.json",
+      "linking": "userId and roleId fields"
+    },
+    "projects": {
+      "source": "config/projects.json",
+      "linking": "projectId and userId fields"
+    }
+  }
+}

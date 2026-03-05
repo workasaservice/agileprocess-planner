@@ -67,6 +67,9 @@ explore-descriptors.sh
 
 # MCP Configuration
 mcp/
+!mcp/
+mcp/*
+!mcp/neon.json
 
 # Added by ggshield
 .cache_ggshield
