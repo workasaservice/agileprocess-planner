@@ -63,9 +63,17 @@
     "neon": {
       "description": "Neon MCP endpoint for Postgres management",
       "database": "neondb",
+      "client": "src/clients/neonMcpClient.ts",
       "mcp": {
         "serverPath": "mcp/neon.json",
-        "url": "https://mcp.neon.tech/mcp"
+        "url": "https://mcp.neon.tech/mcp",
+        "tools": [
+          "query",
+          "execute",
+          "migrate",
+          "seed",
+          "health"
+        ]
       }
     }
   },
@@ -107,14 +115,22 @@
       "allowed": [
         "azureDevOpsMcpClient.callTool()",
         "microsoftGraphMcpClient.callTool()",
-        "agileCoreClient.callTool()"
+        "agileCoreClient.callTool()",
+        "neonMcpClient.callTool()",
+        "neonMcpClient.query()",
+        "neonMcpClient.migrate()",
+        "neonMcpClient.seed()",
+        "neonMcpClient.health()"
       ],
       "prohibited": [
         "axios.post/get/put/patch/delete direct to Azure DevOps",
         "axios.post/get/put/patch/delete direct to Graph API",
         "fetch(), curl, or any HTTP client bypassing MCP",
         "Direct URL calls to https://dev.azure.com/*",
-        "Direct URL calls to https://graph.microsoft.com/*"
+        "Direct URL calls to https://graph.microsoft.com/*",
+        "new pg.Pool() or pg.Client() direct instantiation",
+        "neonClient.getPool() raw pool access",
+        "Direct SQL execution bypassing neonMcpClient"
       ]
     }
   },
