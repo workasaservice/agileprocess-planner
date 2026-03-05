@@ -33,6 +33,7 @@
 import fs from "fs";
 import path from "path";
 import axios, { AxiosInstance } from "axios";
+import { query as directQuery } from "../lib/neonClient";
 
 type NeonMcpConfig = {
   serverUrl: string;
@@ -86,10 +87,28 @@ function createAxiosClient(config: NeonMcpConfig): AxiosInstance {
     baseURL: config.serverUrl,
     headers: {
       Authorization: `Bearer ${config.token}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Accept": "application/json, text/event-stream"
     },
     timeout: 30000
   });
+}
+
+/**
+ * Parse Server-Sent Events (SSE) response format.
+ * MCP returns responses as SSE with "event: message" and "data: {JSON}".
+ */
+function parseSseResponse(sseText: string): McpToolResponse {
+  const lines = sseText.split("\n");
+  for (const line of lines) {
+    if (line.startsWith("data: ")) {
+      const jsonData = line.substring(6).trim();
+      if (jsonData) {
+        return JSON.parse(jsonData) as McpToolResponse;
+      }
+    }
+  }
+  throw new Error("No valid SSE data found in response");
 }
 
 export type McpToolCall = {
@@ -113,7 +132,10 @@ export type McpToolResponse<T = unknown> = {
 export const neonMcpClient = {
   isConfigured() {
     const config = resolveNeonMcpConfig();
-    return Boolean(config.serverUrl && config.token);
+    const hasDirectDb = Boolean(
+      process.env.DATABASE_URL_POOLED?.trim() || process.env.DATABASE_URL?.trim()
+    );
+    return Boolean((config.serverUrl && config.token) || hasDirectDb);
   },
 
   async callTool<T = unknown>(
@@ -132,25 +154,40 @@ export const neonMcpClient = {
 
     const client = createAxiosClient(config);
 
+    // MCP protocol requires "tools/call" method with tool name wrapped in params
     const call: McpToolCall = {
       jsonrpc: "2.0",
-      method: `tools/${tool}`,
-      params
+      method: "tools/call",
+      params: {
+        name: tool,
+        arguments: params
+      },
+      id: Date.now()
     };
 
     try {
-      const response = await client.post<McpToolResponse<T>>(
-        "/",
-        call
-      );
+      const response = await client.post("", call, {
+        // Allow both JSON and SSE response formats
+        responseType: "text"
+      });
 
-      if (response.data.error) {
+      // Parse SSE response if content-type indicates SSE, else parse as JSON
+      let mcpResponse: McpToolResponse<T>;
+      if (typeof response.data === "string" && response.data.includes("event:")) {
+        mcpResponse = parseSseResponse(response.data) as McpToolResponse<T>;
+      } else if (typeof response.data === "string") {
+        mcpResponse = JSON.parse(response.data) as McpToolResponse<T>;
+      } else {
+        mcpResponse = response.data as McpToolResponse<T>;
+      }
+
+      if (mcpResponse.error) {
         throw new Error(
-          `Neon MCP error (${response.data.error.code}): ${response.data.error.message}`
+          `Neon MCP error (${mcpResponse.error.code}): ${mcpResponse.error.message}`
         );
       }
 
-      return response.data.result as T;
+      return mcpResponse.result as T;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(
@@ -165,22 +202,49 @@ export const neonMcpClient = {
     sql: string,
     params?: unknown[]
   ): Promise<T[]> {
-    return this.callTool<T[]>("query", {
-      sql,
-      params: params || []
-    });
+    try {
+      // Neon MCP uses "run_sql" tool, not "query"
+      const result = await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
+        projectId: process.env.NEON_PROJECT_ID || "super-butterfly-14628322",
+        branchId: process.env.NEON_BRANCH_ID || "br-muddy-fog-a88uzi0y",
+        sql,
+        params: params || []
+      });
+      
+      // MCP returns results as {content: [{type: "text", text: "[{...}]"}]}
+      if (result?.content?.[0]?.text) {
+        return JSON.parse(result.content[0].text) as T[];
+      }
+      return result as unknown as T[];
+    } catch {
+      const result = await directQuery<T>(sql, params || []);
+      return result.rows;
+    }
   },
 
   async migrate(sql: string): Promise<{ ok: boolean; message: string }> {
-    return this.callTool<{ ok: boolean; message: string }>("migrate", {
-      sql
-    });
+    try {
+      // Neon MCP uses "run_sql" for migrations
+      const result = await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
+        projectId: process.env.NEON_PROJECT_ID || "super-butterfly-14628322",
+        branchId: process.env.NEON_BRANCH_ID || "br-muddy-fog-a88uzi0y",
+        sql
+      });
+      return { ok: true, message: "Applied via Neon MCP" };
+    } catch {
+      await directQuery(sql);
+      return { ok: true, message: "Applied via direct Postgres fallback" };
+    }
   },
 
   async seed(sql: string): Promise<{ ok: boolean; message: string }> {
-    return this.callTool<{ ok: boolean; message: string }>("seed", {
+    // Seed uses run_sql like migrate
+    const result = await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
+      projectId: process.env.NEON_PROJECT_ID || "super-butterfly-14628322",
+      branchId: process.env.NEON_BRANCH_ID || "br-muddy-fog-a88uzi0y",
       sql
     });
+    return { ok: true, message: "Seeded via Neon MCP" };
   },
 
   async health(): Promise<{
@@ -189,11 +253,42 @@ export const neonMcpClient = {
     now?: string;
     error?: string;
   }> {
-    return this.callTool<{
-      ok: boolean;
-      mode?: string;
-      now?: string;
-      error?: string;
-    }>("health", {});
+    try {
+      // Test connectivity using run_sql
+      const result = await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
+        projectId: process.env.NEON_PROJECT_ID || "super-butterfly-14628322",
+        branchId: process.env.NEON_BRANCH_ID || "br-muddy-fog-a88uzi0y",
+        sql: "SELECT NOW()::text as now"
+      });
+      
+      if (result?.content?.[0]?.text) {
+        const rows = JSON.parse(result.content[0].text) as Array<{ now: string }>;
+        const now = rows[0]?.now;
+        if (now) {
+          return {
+            ok: true,
+            mode: "neon-mcp",
+            now
+          };
+        }
+      }
+      return { ok: true, mode: "neon-mcp" };
+    } catch {
+      const result = await directQuery<{ now: string }>(
+        "SELECT NOW()::text as now"
+      );
+      const now = result.rows[0]?.now;
+      if (now) {
+        return {
+          ok: true,
+          mode: "direct-postgres-fallback",
+          now
+        };
+      }
+      return {
+        ok: true,
+        mode: "direct-postgres-fallback"
+      };
+    }
   }
 };

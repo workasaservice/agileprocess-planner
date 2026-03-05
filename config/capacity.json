@@ -1,0 +1,124 @@
+{
+  "_comment": "Capacity planning and resource allocation matrix",
+  "_note": "Links users (via userId) to roles (via roleId) with focus factors and hours. Projects are referenced but not embedded.",
+  "unit": {
+    "hoursPerSprintBase": 80,
+    "formula": "productiveHoursPerSprint = focusFactor * 80",
+    "sprintDurationDays": 10,
+    "workingDaysPerSprint": 10
+  },
+  "capacity": [
+    {
+      "userId": "tom-baker",
+      "roleId": "product-dad",
+      "focusFactor": 0.9,
+      "productiveHoursPerSprint": 30,
+      "totalCapacityHours": 48
+    },
+    {
+      "userId": "kate-baker",
+      "roleId": "coach-mom",
+      "focusFactor": 0.6,
+      "productiveHoursPerSprint": 48,
+      "totalCapacityHours": 48
+    },
+    {
+      "userId": "nora-baker",
+      "roleId": "meal-planner",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "charlie-baker",
+      "roleId": "head-chef",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "lorraine-baker",
+      "roleId": "interior-decorator",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "henry-baker",
+      "roleId": "recipe-crafter",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "sarah-baker",
+      "roleId": "food-taster",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "jake-baker",
+      "roleId": "kitchen-ops-guru",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "mark-baker",
+      "roleId": "pantry-manager",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 50.4,
+      "totalCapacityHours": 50.4
+    },
+    {
+      "userId": "jessica-baker",
+      "roleId": "home-security-officer",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "kim-baker",
+      "roleId": "couponer-recipe-finder",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "mike-baker",
+      "roleId": "travel-planner",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "nigel-baker",
+      "roleId": "gadget-tester",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "kyle-baker",
+      "roleId": "problem-solver",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 56
+    },
+    {
+      "userId": "dadi-baker",
+      "roleId": "family-elder",
+      "focusFactor": 0.4,
+      "productiveHoursPerSprint": 32,
+      "totalCapacityHours": 32
+    },
+    {
+      "userId": "chhanda-baker",
+      "roleId": "wise-whisperer",
+      "focusFactor": 0.6,
+      "productiveHoursPerSprint": 48,
+      "totalCapacityHours": 48
+    }
+  ]
+}

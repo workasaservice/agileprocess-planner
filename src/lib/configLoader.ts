@@ -165,7 +165,7 @@ class PostgresConfigurationSource implements ConfigurationSource {
               given_name as "givenName", surname, job_title as "jobTitle", department,
               usage_location as "usageLocation", account_enabled as "accountEnabled",
               role_id as "roleId", project_ids as "projectIds"
-       FROM users`
+      FROM config_users`
     );
     return new Map<string, User>(
       (users as unknown as User[]).map((u) => [u.userId, u])
@@ -176,7 +176,7 @@ class PostgresConfigurationSource implements ConfigurationSource {
     const roles = await neonMcpClient.query<Record<string, unknown>>(
       `SELECT role_id as "roleId", role_name as "roleName", subtitle, description,
               default_focus_factor as "defaultFocusFactor", default_activity as "defaultActivity"
-       FROM roles`
+      FROM config_roles`
     );
     return new Map<string, Role>(
       (roles as unknown as Role[]).map((r) => [r.roleId, r])
@@ -188,7 +188,7 @@ class PostgresConfigurationSource implements ConfigurationSource {
       `SELECT user_id as "userId", role_id as "roleId", focus_factor as "focusFactor",
               productive_hours_per_sprint as "productiveHoursPerSprint",
               total_capacity_hours as "totalCapacityHours"
-       FROM capacity`
+      FROM config_capacity`
     );
     return new Map<string, CapacityRecord>(
       (capacity as unknown as CapacityRecord[]).map((c) => [c.userId, c])
@@ -201,8 +201,8 @@ class PostgresConfigurationSource implements ConfigurationSource {
               p.project_full_name as "projectFullName", p.organization,
               p.team_id as "teamId", p.team_name as "teamName",
               COALESCE(json_agg(DISTINCT pm.user_id) FILTER (WHERE pm.user_id IS NOT NULL), '[]'::json) as members
-       FROM projects p
-       LEFT JOIN project_members pm ON p.project_id = pm.project_id
+      FROM config_projects p
+      LEFT JOIN config_project_members pm ON p.project_id = pm.project_id
        GROUP BY p.project_id, p.project_name, p.project_full_name, p.organization,
                 p.team_id, p.team_name`
     );
@@ -214,7 +214,7 @@ class PostgresConfigurationSource implements ConfigurationSource {
   async loadCredentials(): Promise<Map<string, Credential>> {
     const credentials = await neonMcpClient.query<Record<string, unknown>>(
       `SELECT user_id as "userId", user_principal_name as "userPrincipalName", password
-       FROM credentials`
+      FROM config_credentials`
     );
     return new Map<string, Credential>(
       (credentials as unknown as Credential[]).map((c) => [c.userId, c])
@@ -490,16 +490,18 @@ export function getUserWithCredentials(userId: string): (User & Credential) | un
  */
 export function getAllUsersWithCredentials(): (User & Credential)[] {
   const config = loadConfiguration();
-  return Array.from(config.users.values()).map((user) => {
-    const credential = config.credentials.get(user.userId);
-    if (!credential) {
-      throw new Error(`No credentials found for user ${user.userId}`);
-    }
-    return {
-      ...user,
-      ...credential,
-    };
-  });
+  return Array.from(config.users.values())
+    .map((user) => {
+      const credential = config.credentials.get(user.userId);
+      if (!credential) {
+        return null; // User without credentials will be filtered out
+      }
+      return {
+        ...user,
+        ...credential,
+      };
+    })
+    .filter((item) => item !== null) as (User & Credential)[];
 }
 
 /**
