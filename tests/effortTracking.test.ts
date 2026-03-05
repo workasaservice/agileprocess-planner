@@ -221,3 +221,97 @@ describe('Effort Tracking Module', () => {
     });
   });
 });
+
+describe('calculateSprintSummary', () => {
+  // Import the exported function via require to avoid circular mock issues
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { calculateSprintSummary } = require('../src/handlers/syncEffortTracking');
+
+  const makeWorkItem = (
+    id: number,
+    state: string,
+    estimate?: number,
+    remaining?: number,
+    completed?: number
+  ) => ({
+    id,
+    fields: {
+      'System.Title': `Task ${id}`,
+      'System.State': state,
+      'System.IterationPath': 'MyProject\\Sprint 1',
+      ...(estimate !== undefined ? { 'Custom.OriginalEstimate': estimate } : {}),
+      ...(remaining !== undefined ? { 'Custom.RemainingWork': remaining } : {}),
+      ...(completed !== undefined ? { 'Custom.CompletedWork': completed } : {}),
+    },
+  });
+
+  test('returns zero totals for an empty work item list', () => {
+    const result = calculateSprintSummary('sprint-1', 'MyProject\\Sprint 1', []);
+    expect(result.totalEstimated).toBe(0);
+    expect(result.totalRemaining).toBe(0);
+    expect(result.totalCompleted).toBe(0);
+    expect(result.taskCount).toBe(0);
+    expect(result.tasksWithEstimates).toBe(0);
+    expect(result.tasksInProgress).toBe(0);
+    expect(result.tasksCompleted).toBe(0);
+  });
+
+  test('sums effort hours across all work items', () => {
+    const items = [
+      makeWorkItem(1, 'Active', 4, 2, 2),
+      makeWorkItem(2, 'Closed', 8, 0, 8),
+      makeWorkItem(3, 'New', 2, 2, 0),
+    ];
+    const result = calculateSprintSummary('sprint-1', 'MyProject\\Sprint 1', items);
+    expect(result.totalEstimated).toBe(14);
+    expect(result.totalRemaining).toBe(4);
+    expect(result.totalCompleted).toBe(10);
+    expect(result.taskCount).toBe(3);
+  });
+
+  test('counts tasksWithEstimates only when estimate > 0', () => {
+    const items = [
+      makeWorkItem(1, 'New', 4),      // has estimate
+      makeWorkItem(2, 'New', 0),      // estimate = 0
+      makeWorkItem(3, 'New'),         // no estimate field
+    ];
+    const result = calculateSprintSummary('sprint-1', 'MyProject\\Sprint 1', items);
+    expect(result.tasksWithEstimates).toBe(1);
+  });
+
+  test('classifies "Active" and "In Progress" states as tasksInProgress', () => {
+    const items = [
+      makeWorkItem(1, 'Active'),
+      makeWorkItem(2, 'In Progress'),
+      makeWorkItem(3, 'New'),
+      makeWorkItem(4, 'Closed'),
+    ];
+    const result = calculateSprintSummary('sprint-1', 'MyProject\\Sprint 1', items);
+    expect(result.tasksInProgress).toBe(2);
+  });
+
+  test('classifies "Closed" and "Done" states as tasksCompleted', () => {
+    const items = [
+      makeWorkItem(1, 'Closed'),
+      makeWorkItem(2, 'Done'),
+      makeWorkItem(3, 'Active'),
+    ];
+    const result = calculateSprintSummary('sprint-1', 'MyProject\\Sprint 1', items);
+    expect(result.tasksCompleted).toBe(2);
+  });
+
+  test('includes a burndown data point for today', () => {
+    const items = [makeWorkItem(1, 'Active', 8, 5, 3)];
+    const result = calculateSprintSummary('sprint-1', 'MyProject\\Sprint 1', items);
+    expect(result.burndownData).toHaveLength(1);
+    expect(result.burndownData[0]!.remaining).toBe(5);
+    expect(result.burndownData[0]!.completed).toBe(3);
+    expect(result.burndownData[0]!.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  test('preserves sprintId and iterationPath in the result', () => {
+    const result = calculateSprintSummary('sprint-xyz', 'MyProject\\Sprint 5', []);
+    expect(result.sprintId).toBe('sprint-xyz');
+    expect(result.iterationPath).toBe('MyProject\\Sprint 5');
+  });
+});

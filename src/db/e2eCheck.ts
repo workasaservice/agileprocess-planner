@@ -9,8 +9,27 @@ dotenv.config();
 
 type CountRow = { count: string };
 
-async function getCount(tableName: string): Promise<number> {
+type CountableTable = "organizations" | "projects" | "teams" | "json_documents";
+
+const ALLOWED_TABLES: ReadonlyArray<CountableTable> = [
+  "organizations",
+  "projects",
+  "teams",
+  "json_documents",
+];
+
+async function getTableCount(tableName: CountableTable): Promise<number> {
+  if (!ALLOWED_TABLES.includes(tableName)) {
+    throw new Error(`Invalid table name for count query: ${tableName}`);
+  }
   const result = await query<CountRow>(`SELECT COUNT(*)::text AS count FROM ${tableName}`);
+  return Number(result.rows[0]?.count || 0);
+}
+
+async function getInvalidJsonDocCount(): Promise<number> {
+  const result = await query<CountRow>(
+    "SELECT COUNT(*)::text AS count FROM json_documents WHERE is_valid_json = false"
+  );
   return Number(result.rows[0]?.count || 0);
 }
 
@@ -20,11 +39,11 @@ async function run() {
     throw new Error(`Database health check failed: ${health.error || "unknown"}`);
   }
 
-  const organizations = await getCount("organizations");
-  const projects = await getCount("projects");
-  const teams = await getCount("teams");
-  const jsonDocs = await getCount("json_documents");
-  const invalidJsonDocs = await getCount("json_documents WHERE is_valid_json = false");
+  const organizations = await getTableCount("organizations");
+  const projects = await getTableCount("projects");
+  const teams = await getTableCount("teams");
+  const jsonDocs = await getTableCount("json_documents");
+  const invalidJsonDocs = await getInvalidJsonDocCount();
 
   const result = {
     health,

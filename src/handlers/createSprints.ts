@@ -100,11 +100,11 @@ function addDays(date: Date, days: number): Date {
   return result;
 }
 
-function getLastFridayOfWeek(monday: Date): Date {
-  // For a 2-week sprint starting Monday, the last Friday is 11 days later
-  // Week 1: Mon(0), Tue(1), Wed(2), Thu(3), Fri(4)
-  // Week 2: Mon(7), Tue(8), Wed(9), Thu(10), Fri(11)
-  return addDays(monday, 11);
+function getLastFridayOfWeek(monday: Date, durationWeeks: number): Date {
+  // For a sprint starting Monday, the last Friday is (durationWeeks * 7 - 3) days later
+  // e.g., 2-week sprint: 2*7-3 = 11 days (Mon → Fri of week 2)
+  // e.g., 1-week sprint: 1*7-3 = 4 days (Mon → Fri of week 1)
+  return addDays(monday, durationWeeks * 7 - 3);
 }
 
 function generateSprintWindows(config: AutomationConfig): SprintWindow[] {
@@ -129,7 +129,7 @@ function generateSprintWindows(config: AutomationConfig): SprintWindow[] {
     currentStart = new Date(startDate);
 
     while (currentStart <= endDate && sprintCount < config.validation.maxSprintsPerProject) {
-      const finishDate = getLastFridayOfWeek(currentStart);
+      const finishDate = getLastFridayOfWeek(currentStart, durationWeeks);
 
       // Stop if finish date exceeds end date
       if (finishDate > endDate) {
