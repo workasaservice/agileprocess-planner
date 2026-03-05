@@ -9,10 +9,8 @@ describe('Utility Modules', () => {
   const libDir = path.join(__dirname, '../src/lib');
 
   describe('File Existence', () => {
-    test('lib directory should exist if it exists', () => {
-      if (fs.existsSync(libDir)) {
-        expect(fs.existsSync(libDir)).toBe(true);
-      }
+    test('lib directory should exist', () => {
+      expect(fs.existsSync(libDir)).toBe(true);
     });
   });
 });
