@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import path from 'path';
+import { calculateSprintSummary } from '../src/handlers/syncEffortTracking';
 
 describe('Effort Tracking Module', () => {
   const srcDir = path.join(__dirname, '../src');
@@ -223,10 +224,6 @@ describe('Effort Tracking Module', () => {
 });
 
 describe('calculateSprintSummary', () => {
-  // Import the exported function via require to avoid circular mock issues
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { calculateSprintSummary } = require('../src/handlers/syncEffortTracking');
-
   const makeWorkItem = (
     id: number,
     state: string,
