@@ -11,9 +11,6 @@ pnpm-debug.log*
 dist/
 coverage/
 
-# MCP Configuration - contains credentials
-mcp/azure-devops.json
-
 # IDE
 .vscode/
 .idea/
@@ -25,15 +22,50 @@ mcp/azure-devops.json
 Thumbs.db
 
 # Docs
-docs/mcp/azure-devops.json
-docs
+docs/
 
-
-# User credentials - contains sensitive email addresses and passwords
-users.credentials.json
-
+# GitHub
 .github
 
-mcp
+# Security: Credential and Configuration Files
+# ============================================
+# AZURE DEVOPS CREDENTIALS - PAT tokens
+azure-devops.json
+mcp/azure-devops.json
+
+# MICROSOFT GRAPH/ENTRA ID CREDENTIALS - AppId, TenantId, Secrets
+mcp/microsoft-graph.json
+
+# USER AND AUTHENTICATION DATA
+users.credentials.json
+users.json
+members.json
+add-users-input.json
+input.json
+
+# USER ASSIGNMENTS AND SENSITIVE OPERATIONS
+*assignments.json
+*-assignments.json
+*-output.log
+user-assignment-output.log
+capacity
+
+# SHELL SCRIPTS WITH EMBEDDED TOKEN REFERENCES
+# (These reference credential files and should not be committed with tokens)
+add-*.sh
+assign-*.sh
+test-*.sh
+add_*.sh
+*.sh
+
+# Investigation and temporary files
+investigation-report.md
+invoke-add-users.ts
+fetch-descriptors.js
+explore-descriptors.sh
+
+# MCP Configuration
+mcp/
+
 # Added by ggshield
 .cache_ggshield
