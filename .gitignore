@@ -44,6 +44,10 @@ members.json
 add-users-input.json
 input.json
 
+# SEED DATA - contains user info and credentials
+data/seed/*.json
+!data/seed/README.md
+
 # USER ASSIGNMENTS AND SENSITIVE OPERATIONS
 *assignments.json
 *-assignments.json

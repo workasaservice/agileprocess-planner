@@ -1,7 +1,7 @@
 /**
  * Data Migration Script
  * 
- * Loads configuration data from JSON files into Postgres database.
+ * Loads configuration data from JSON seed files into Postgres database.
  * Enables handlers to read from database when PERSISTENCE_MODE=postgres.
  * 
  * Usage:
@@ -20,13 +20,13 @@ import {
   CapacityRecord,
 } from "../src/lib/configLoader";
 
-const configDir = path.join(process.cwd(), "config");
+const seedDir = path.join(process.cwd(), "data", "seed");
 
 async function loadJsonFiles() {
-  console.log("📂 Loading JSON configuration files...");
+  console.log("📂 Loading JSON seed files from data/seed/...");
 
   const rawUsers: User[] = JSON.parse(
-    fs.readFileSync(path.join(configDir, "users.json"), "utf8")
+    fs.readFileSync(path.join(seedDir, "users.json"), "utf8")
   ).users;
 
   // Keep the first record for each unique userId and userPrincipalName.
@@ -45,19 +45,19 @@ async function loadJsonFiles() {
   }
 
   const roles: Role[] = JSON.parse(
-    fs.readFileSync(path.join(configDir, "roles.json"), "utf8")
+    fs.readFileSync(path.join(seedDir, "roles.json"), "utf8")
   ).roles;
 
   const capacity: CapacityRecord[] = JSON.parse(
-    fs.readFileSync(path.join(configDir, "capacity.json"), "utf8")
+    fs.readFileSync(path.join(seedDir, "capacity.json"), "utf8")
   ).capacity;
 
   const projects: Project[] = JSON.parse(
-    fs.readFileSync(path.join(configDir, "projects.json"), "utf8")
+    fs.readFileSync(path.join(seedDir, "projects.json"), "utf8")
   ).projects;
 
   const credentials: Credential[] = JSON.parse(
-    fs.readFileSync(path.join(process.cwd(), "users.credentials.json"), "utf8")
+    fs.readFileSync(path.join(seedDir, "users.credentials.json"), "utf8")
   ).credentials;
 
   console.log(`✓ Loaded ${users.length} users (${rawUsers.length} raw)`);
