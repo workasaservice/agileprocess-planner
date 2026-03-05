@@ -8,6 +8,7 @@
 			"create-devops-items",
 			"create-backlog-items",
 			"create-sprint-items",
+			"create-sprints",
 			"create-users",
 			"assign-users-to-groups",
 			"assign-users-to-devops-teams"

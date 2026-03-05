@@ -1,0 +1,105 @@
+{
+  "$schema": "./meetings-automation-schema.json",
+  "description": "Configuration for automated recurring Sprint Meetings work items across all sprints",
+  "version": "2.0.0",
+  "approach": "hybrid",
+  "_approachOptions": ["code-based", "template-based", "profile-based", "hybrid"],
+  "workItemTemplates": {
+    "epic": {
+      "type": "Epic",
+      "title": "Team Operations",
+      "description": "Umbrella epic for all team operational activities including sprint meetings, ceremonies, and team coordination",
+      "tags": ["operations", "team", "automation"]
+    },
+    "feature": {
+      "type": "Feature",
+      "title": "Sprint Meetings",
+      "description": "Recurring sprint meetings and ceremonies across all iterations. Each sprint has a dedicated user story with tasks for all team members.",
+      "tags": ["meetings", "sprint-ceremony", "automation"]
+    },
+    "userStory": {
+      "type": "Issue",
+      "title": "Meetings",
+      "descriptionTemplate": "Sprint meetings and ceremonies for {{sprintName}} ({{startDate}} to {{finishDate}}). Each team member has an assigned task for tracking meeting participation and preparation.",
+      "tags": ["meetings", "sprint-{{sprintNumber}}"],
+      "acceptanceCriteria": [
+        "All team members attend sprint planning",
+        "Daily standups conducted throughout sprint",
+        "Sprint review completed with stakeholders",
+        "Sprint retrospective conducted and action items documented"
+      ]
+    },
+    "task": {
+      "type": "Task",
+      "titleTemplate": "{{firstName}}",
+      "descriptionTemplate": "Meeting participation and preparation tasks for {{firstName}} ({{fullName}}) during {{sprintName}}.\n\nResponsibilities:\n- Attend sprint planning and provide estimates\n- Participate in daily standups\n- Prepare for and attend sprint review\n- Contribute to sprint retrospective",
+      "tags": ["meeting-task"],
+      "estimatedHours": 4
+    }
+  },
+  "projects": [
+    {
+      "projectId": "MotherOps-Alpha",
+      "projectName": "MotherOps-Alpha",
+      "teamName": "MotherOps-Alpha Team",
+      "enabled": true
+    },
+    {
+      "projectId": "MotherOps-Beta",
+      "projectName": "MotherOps-Beta",
+      "teamName": "MotherOps-Beta Team",
+      "enabled": true
+    }
+  ],
+  "settings": {
+    "createEpicPerProject": true,
+    "createFeaturePerProject": false,
+    "createUserStoryPerSprint": true,
+    "createTaskPerTeamMember": true,
+    "assignTasksToMembers": true,
+    "linkWorkItemHierarchy": true,
+    "skipExistingWorkItems": true,
+    "saveWorkItemIds": true,
+    "outputFile": "config/meetings-work-items.json"
+  },
+  "dataSourceReferences": {
+    "sprints": "config/generated-iterations.json",
+    "users": "config/users.json",
+    "projects": "config/projects.json",
+    "roles": "config/roles.json"
+  },
+  "expectedOutput": {
+    "totalWorkItems": 382,
+    "breakdown": {
+      "epics": 2,
+      "features": 2,
+      "userStories": 42,
+      "tasks": 336,
+      "tasksByProject": {
+        "motherops-alpha": 147,
+        "motherops-beta": 189
+      }
+    }
+  },
+  "templateSettings": {
+    "enabled": false,
+    "_note": "When enabled, clones from template work items instead of creating from scratch",
+    "templates": {
+      "MotherOps-Alpha": {
+        "templateWorkItemId": null,
+        "epicId": null,
+        "description": "Set after creating golden template in Azure DevOps UI"
+      },
+      "MotherOps-Beta": {
+        "templateWorkItemId": null,
+        "epicId": null,
+        "description": "Set after creating golden template in Azure DevOps UI"
+      }
+    }
+  },
+  "profileSettings": {
+    "enabled": false,
+    "_note": "When enabled, uses team-meeting-profiles.json for team-specific configurations",
+    "configFile": "config/team-meeting-profiles.json"
+  }
+}

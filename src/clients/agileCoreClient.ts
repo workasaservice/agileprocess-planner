@@ -1,3 +1,23 @@
+/**
+ * Agile Core Service Client (via MCP)
+ * 
+ * ⚠️  POLICY: MCP-ONLY ENFORCEMENT (enforced by unified-config.json#policy.api.mcpOnly)
+ * 
+ * All interactions with Agile Core planning service MUST go through this MCP client.
+ * Direct HTTP calls bypassing MCP are PROHIBITED.
+ * 
+ * This client ensures:
+ * ✓ Proper service authentication
+ * ✓ Request/response audit logging
+ * ✓ Centralized error handling
+ * ✓ Rate limiting and throttling
+ * 
+ * NEVER: Make direct HTTP calls to the Agile Core service
+ * ALWAYS: Use agileCoreClient.callTool() for all service interactions
+ * 
+ * @see config/unified-config.json#policy.api for full MCP-only policy
+ */
+
 import axios, { AxiosInstance } from "axios";
 import fs from "fs";
 import path from "path";

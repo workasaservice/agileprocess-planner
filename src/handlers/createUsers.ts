@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { getMicrosoftGraphMCPClient } from "../clients/microsoftGraphRealMcpClient";
+import { getAllUsersWithCredentialsSync, validateReferentialIntegritySync } from "../lib/configLoader";
 
 type UserInput = {
   displayName: string;
@@ -160,8 +161,49 @@ export async function createUsers(args: Record<string, any>): Promise<any> {
 
   let input: any;
   const filePath = args.file || args.input || args.path;
+  const fromConfig = args.fromConfig === true || args.fromConfig === "true" || (!filePath && args.auto === true);
 
-  if (filePath) {
+  // Load from modular config if requested or if no file provided and auto mode enabled
+  if (fromConfig || (!filePath && args.useConfig !== false)) {
+    console.log(`\n📂 Loading users from modular configuration files...\n`);
+    
+    try {
+      // Validate referential integrity first
+      const validation = validateReferentialIntegritySync();
+      if (!validation.valid) {
+        console.log(`⚠️  Configuration validation warnings:`);
+        validation.errors.forEach((err) => console.log(`   - ${err}`));
+      }
+
+      // Load all users with credentials from modular config
+      const usersWithCreds = getAllUsersWithCredentialsSync();
+      
+      // Transform to UserInput format
+      input = {
+        users: usersWithCreds.map((user) => ({
+          displayName: user.displayName,
+          userPrincipalName: user.userPrincipalName,
+          mailNickname: user.mailNickname,
+          givenName: user.givenName,
+          surname: user.surname,
+          jobTitle: user.jobTitle,
+          department: user.department,
+          usageLocation: user.usageLocation,
+          accountEnabled: user.accountEnabled,
+          password: user.password, // From credentials
+          forceChangePasswordNextSignIn: true,
+        })),
+      };
+
+      console.log(`✅ Loaded ${usersWithCreds.length} users from configuration`);
+    } catch (err: any) {
+      return {
+        success: false,
+        error: `Failed to load users from configuration: ${err.message}`,
+      };
+    }
+  } else if (filePath) {
+    // Load from file (existing behavior)
     const fullPath = path.resolve(process.cwd(), filePath);
     if (!fs.existsSync(fullPath)) {
       return {

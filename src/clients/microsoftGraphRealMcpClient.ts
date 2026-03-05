@@ -1,3 +1,26 @@
+/**
+ * Microsoft Graph MCP Client
+ * 
+ * ⚠️  POLICY: MCP-ONLY ENFORCEMENT (enforced by unified-config.json#policy.api.mcpOnly)
+ * 
+ * All interactions with Microsoft Graph API MUST go through this proper MCP implementation.
+ * Direct HTTP calls to graph.microsoft.com are PROHIBITED.
+ * 
+ * This client ensures:
+ * ✓ Proper OAuth2 token management via MCP server
+ * ✓ Request/response audit logging
+ * ✓ Centralized error handling with token refresh
+ * ✓ Secure credential management (NOT in client code)
+ * 
+ * NEVER: Make direct fetch/axios calls to https://graph.microsoft.com
+ * ALWAYS: Use microsoftGraphMcpClient.callTool() for all interactions
+ * 
+ * This uses stdio transport to communicate with the running MCP server,
+ * ensuring all authentication and API calls are properly managed.
+ * 
+ * @see config/unified-config.json#policy.api for full MCP-only policy
+ */
+
 import { spawn, ChildProcess } from "child_process";
 import path from "path";
 import dotenv from "dotenv";

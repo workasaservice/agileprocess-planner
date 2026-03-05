@@ -42,6 +42,40 @@ Optional:
 - `OPS360_AGILE_CORE_API_KEY` (if required by the API)
 - `OPS360_AGILE_CORE_TIMEOUT_MS`
 
+## 🔒 MCP-Only Architecture Policy
+
+**All external API calls must go through Model Context Protocol (MCP) servers.**
+
+This system enforces a strict MCP-only policy for all interactions with external services:
+
+✅ **ALLOWED:**
+```typescript
+azureDevOpsMcpClient.callTool("create-work-item", { ... })
+microsoftGraphMcpClient.callTool("create-user", { ... })
+agileCoreClient.callTool("plan-backlog", { ... })
+```
+
+❌ **PROHIBITED:**
+```typescript
+// Direct HTTP calls to Azure DevOps
+axios.post("https://dev.azure.com/...", { ... })
+
+// Direct API calls to Microsoft Graph
+fetch("https://graph.microsoft.com/...", { ... })
+
+// Any service bypassing MCP
+curl https://dev.azure.com/...
+```
+
+**Why?** MCP provides:
+- ✓ Centralized authentication & credential management
+- ✓ Comprehensive request/response logging & audit trails
+- ✓ Rate limiting, throttling, and error handling
+- ✓ Token refresh management
+- ✓ Security & compliance
+
+**See [MCP_POLICY.md](MCP_POLICY.md) for full enforcement details and patterns.**
+
 ## Commands
 
 ### Work Item Management
@@ -174,6 +208,49 @@ Detailed usage docs are maintained in the private AgileProcessCore repo.
 - Build: `npm run build`
 - Run (ts-node): `npm run dev`
 - Run (compiled): `npm run start`
+
+## Testing
+
+The project includes a comprehensive Jest test suite covering handlers, clients, configurations, and project structure.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+### Test Coverage
+
+The test suite validates:
+- **Handlers** (4 test suites): Handler implementations, MCP compliance, dry-run support
+- **Clients** (7 tests): Client modules, MCP policy headers, error handling
+- **Configuration** (9 tests): Configuration file validity, JSON structure
+- **Project Structure** (40+ tests): File organization, dependencies, TypeScript setup
+
+**Current Test Status:** ✅ 60/60 tests passing
+
+### Test Files
+
+Test files are located in the `tests/` directory:
+- `handlers.test.ts` - Handler interface and implementation tests
+- `clients.test.ts` - Client module validation tests
+- `configuration.test.ts` - Configuration file structure tests
+- `projectStructure.test.ts` - Project organization and setup tests
+- `setup.ts` - Jest global test setup and environment configuration
+
+### Key Test Principles
+
+1. **MCP Policy Enforcement**: All tests verify that handlers use `azureDevOpsMcpClient` exclusively
+2. **Configuration Validation**: Tests ensure all configuration files are valid JSON and properly structured
+3. **Structure Validation**: Tests verify project organization and required file existence
+4. **TypeScript Compliance**: Tests validate TypeScript configuration and type safety
 
 ## CLI
 After building, you can run:

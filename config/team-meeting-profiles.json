@@ -1,0 +1,135 @@
+{
+  "_comment": "Team-specific meeting profiles for sprint automation",
+  "_version": "1.0.0",
+  
+  "profiles": {
+    "scrum-standard": {
+      "description": "Standard Scrum ceremonies with individual task assignment",
+      "taskStructure": "individual-per-member",
+      "rotation": {
+        "enabled": false,
+        "roles": [],
+        "frequency": "per-sprint"
+      },
+      "ceremonies": [
+        {
+          "name": "Sprint Planning",
+          "description": "Plan and commit to work for the sprint",
+          "durationMinutes": 120,
+          "participants": "all-members",
+          "estimatedHours": 2
+        },
+        {
+          "name": "Daily Standup",
+          "description": "15-minute daily sync (20 working days)",
+          "durationMinutes": 15,
+          "participants": "all-members",
+          "estimatedHours": 0.5
+        },
+        {
+          "name": "Sprint Review",
+          "description": "Demo completed work to stakeholders",
+          "durationMinutes": 60,
+          "participants": "all-members",
+          "estimatedHours": 1
+        },
+        {
+          "name": "Sprint Retrospective",
+          "description": "Reflect on process and identify improvements",
+          "durationMinutes": 60,
+          "participants": "all-members",
+          "estimatedHours": 1
+        }
+      ]
+    },
+    
+    "role-based-rotation": {
+      "description": "Role-based assignments with automatic rotation",
+      "taskStructure": "role-based",
+      "rotation": {
+        "enabled": true,
+        "roles": ["facilitator", "notetaker"],
+        "frequency": "per-sprint"
+      },
+      "ceremonies": [
+        {
+          "name": "Sprint Planning",
+          "description": "Plan and commit to work for the sprint",
+          "durationMinutes": 120,
+          "participants": "all-members",
+          "estimatedHours": 3
+        },
+        {
+          "name": "Daily Standup (20 days)",
+          "description": "15-minute daily sync",
+          "durationMinutes": 300,
+          "participants": "all-members",
+          "estimatedHours": 1
+        },
+        {
+          "name": "Sprint Review",
+          "description": "Demo completed work to stakeholders",
+          "durationMinutes": 60,
+          "participants": "all-members",
+          "estimatedHours": 2
+        },
+        {
+          "name": "Sprint Retrospective",
+          "description": "Reflect on process and identify improvements",
+          "durationMinutes": 60,
+          "participants": "all-members",
+          "estimatedHours": 2
+        }
+      ]
+    }
+  },
+  
+  "teamAssignments": {
+    "MotherOps-Alpha Team": {
+      "profileName": "scrum-standard",
+      "customizations": {
+        "overrideEstimatedHours": {
+          "Sprint Planning": 2.5,
+          "Daily Standup": 0.5,
+          "Sprint Review": 1.5,
+          "Sprint Retrospective": 1.5
+        }
+      }
+    },
+    "MotherOps-Beta Team": {
+      "profileName": "scrum-standard",
+      "customizations": {
+        "additionalCeremonies": [
+          {
+            "name": "Backlog Refinement",
+            "description": "Refine and estimate upcoming backlog items",
+            "durationMinutes": 60,
+            "participants": "all-members",
+            "estimatedHours": 1
+          }
+        ],
+        "overrideEstimatedHours": {
+          "Sprint Planning": 3,
+          "Daily Standup": 0.5,
+          "Sprint Review": 2,
+          "Sprint Retrospective": 1.5
+        }
+      }
+    }
+  },
+  
+  "rotationState": {
+    "MotherOps-Alpha Team": {
+      "currentFacilitator": null,
+      "currentNotetaker": null,
+      "rotationIndex": 0,
+      "lastUpdated": null
+    },
+    "MotherOps-Beta Team": {
+      "currentFacilitator": null,
+      "currentNotetaker": null,
+      "rotationIndex": 0,
+      "lastUpdated": null
+    }
+  }
+}

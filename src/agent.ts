@@ -3,6 +3,7 @@
 
 import dotenv from "dotenv";
 
+import { loadConfiguration, loadConfigurationAsync, isPostgresMode } from "./lib/configLoader";
 import { planBacklog } from "./handlers/planBacklog";
 import { createDevopsItems } from "./handlers/createDevopsItems";
 import { createBacklogItems } from "./handlers/createBacklogItems";
@@ -17,6 +18,7 @@ import { createSprintMeetings } from "./handlers/createSprintMeetings";
 import { createSprintMeetingsWithProfiles } from "./handlers/createSprintMeetingsWithProfiles";
 import { createSprintMeetingsFromTemplate } from "./handlers/createSprintMeetingsFromTemplate";
 import { createUnplannedItems } from "./handlers/createUnplannedItems";
+import { effortInit, effortSync, effortValidate } from "./handlers/effortTrackingCommands";
 
 dotenv.config();
 
@@ -107,6 +109,9 @@ async function routeCommand(
     "create-sprint-meetings-with-profiles": createSprintMeetingsWithProfiles,
     "create-sprint-meetings-from-template": createSprintMeetingsFromTemplate,
     "create-unplanned-items": createUnplannedItems,
+    "effort-init": effortInit,
+    "effort-sync": effortSync,
+    "effort-validate": effortValidate,
   };
 
   // Check if command is registered
@@ -150,6 +155,28 @@ async function routeCommand(
 
 export async function activateAgent(): Promise<any> {
   console.log("AgileProcess Planner Ready!");
+
+  // Initialize configuration
+  try {
+    const mode = isPostgresMode() ? "postgres" : "json";
+    console.log(`Loading configuration from ${mode} source...`);
+    
+    if (isPostgresMode()) {
+      // Async loading for Postgres mode
+      await loadConfigurationAsync();
+    } else {
+      // Synchronous loading for JSON mode
+      loadConfiguration();
+    }
+    
+    console.log("Configuration loaded successfully.");
+  } catch (error) {
+    console.error(
+      "Failed to initialize configuration:",
+      error instanceof Error ? error.message : String(error)
+    );
+    throw error;
+  }
 
   return {
     routeCommand,

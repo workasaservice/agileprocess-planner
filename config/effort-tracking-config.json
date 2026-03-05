@@ -1,0 +1,91 @@
+{
+  "processTemplate": {
+    "reuseExistingProcess": true,
+    "existingProcessName": "WaaS",
+    "createNewIfNotExists": true,
+    "name": "Agile-MotherOps-EffortTracking",
+    "description": "Custom Agile process with effort tracking fields for all tasks",
+    "baseProcess": "Agile",
+    "workItemTypes": {
+      "Task": {
+        "fields": [
+          {
+            "name": "Custom.OriginalEstimate",
+            "displayName": "Original Estimate",
+            "type": "decimal",
+            "description": "Initial effort estimate when task is created (in hours)",
+            "defaultValue": null,
+            "isRequired": false,
+            "layoutGroup": "Effort (Hours)",
+            "layoutOrder": 1
+          },
+          {
+            "name": "Custom.RemainingWork",
+            "displayName": "Remaining",
+            "type": "decimal",
+            "description": "Hours remaining to complete the task",
+            "defaultValue": null,
+            "isRequired": false,
+            "layoutGroup": "Effort (Hours)",
+            "layoutOrder": 2
+          },
+          {
+            "name": "Custom.CompletedWork",
+            "displayName": "Completed",
+            "type": "decimal",
+            "description": "Hours already spent on the task",
+            "defaultValue": 0,
+            "isRequired": false,
+            "layoutGroup": "Effort (Hours)",
+            "layoutOrder": 3
+          }
+        ]
+      }
+    }
+  },
+  "automation": {
+    "onTaskCreate": {
+      "enabled": true,
+      "setCompletedWorkToZero": true,
+      "copyOriginalToRemaining": true,
+      "suggestEstimateFromCapacity": false
+    },
+    "onTaskUpdate": {
+      "enabled": true,
+      "recalculateRemaining": true,
+      "alertOnScopeCreep": true,
+      "scopeCreepThreshold": 1.5
+    },
+    "dailySync": {
+      "enabled": true,
+      "schedule": "0 18 * * *",
+      "syncActiveSprints": true,
+      "generateBurndown": true
+    }
+  },
+  "validation": {
+    "rules": {
+      "originalEstimate": {
+        "min": 0.1,
+        "max": 40,
+        "recommendedMax": 8,
+        "warningMessage": "Tasks > 8 hours should be split into smaller tasks"
+      },
+      "remainingWork": {
+        "min": 0,
+        "maxMultiplier": 1.5,
+        "warningMessage": "Remaining work exceeds original estimate by 50%"
+      },
+      "completedWork": {
+        "min": 0,
+        "requireJustificationAbove": 16
+      }
+    }
+  },
+  "reporting": {
+    "burndownInterval": "daily",
+    "capacityAlerts": true,
+    "estimationAccuracyTracking": true,
+    "velocityCalculation": "completedWork"
+  }
+}

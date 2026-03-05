@@ -39,6 +39,12 @@ type AzureDevOpsMcpConfig = {
   project: string;
 };
 
+type ToolHandler = (
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) => Promise<any>;
+
 type McpConfigFileShape = Partial<AzureDevOpsMcpConfig>;
 
 function loadMcpConfigFile(): McpConfigFileShape {
@@ -111,27 +117,12 @@ export const azureDevOpsMcpClient = {
     const client = createAxiosClient(config);
 
     try {
-      // Route different tools to appropriate Azure DevOps endpoints
-      switch (tool) {
-        case "list-work-items":
-          return await listWorkItems(client, config, args);
-        case "get-work-item":
-          return await getWorkItem(client, config, args);
-        case "create-work-item":
-          return await createWorkItem(client, config, args);
-        case "clone-work-item":
-          return await cloneWorkItem(client, config, args);
-        case "update-work-item":
-          return await updateWorkItem(client, config, args);
-        case "list-sprints":
-          return await listSprints(client, config, args);
-        case "get-sprint":
-          return await getSprint(client, config, args);
-        case "create-sprint":
-          return await createSprint(client, config, args);
-        default:
-          throw new Error(`Unknown tool: ${tool}`);
+      const handler = TOOL_HANDLERS[tool];
+      if (!handler) {
+        throw new Error(`Unknown tool: ${tool}`);
       }
+
+      return await handler(client, config, args);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(
@@ -142,6 +133,8 @@ export const azureDevOpsMcpClient = {
     }
   }
 };
+
+export type AzureDevOpsMcpClient = typeof azureDevOpsMcpClient;
 
 async function listWorkItems(
   client: AxiosInstance,
@@ -492,3 +485,204 @@ async function createSprint(
     team
   };
 }
+
+/**
+ * Update effort tracking fields on a work item
+ * Supports Original Estimate, Remaining Work, and Completed Work
+ */
+async function updateEffortFields(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { 
+    id, 
+    originalEstimate, 
+    remainingWork, 
+    completedWork,
+    project 
+  } = args;
+
+  const targetProject = (project as string) || config.project;
+  const patches: Array<{ op: string; path: string; value: unknown }> = [];
+
+  if (originalEstimate !== undefined) {
+    patches.push({ 
+      op: "add", 
+      path: "/fields/Custom.OriginalEstimate", 
+      value: originalEstimate 
+    });
+  }
+
+  if (remainingWork !== undefined) {
+    patches.push({ 
+      op: "add", 
+      path: "/fields/Custom.RemainingWork", 
+      value: remainingWork 
+    });
+  }
+
+  if (completedWork !== undefined) {
+    patches.push({ 
+      op: "add", 
+      path: "/fields/Custom.CompletedWork", 
+      value: completedWork 
+    });
+  }
+
+  if (patches.length === 0) {
+    throw new Error("At least one effort field must be provided");
+  }
+
+  const response = await client.patch(
+    `${config.org}/${targetProject}/_apis/wit/workitems/${id}`,
+    patches,
+    {
+      params: { "api-version": "7.0" },
+      headers: { "Content-Type": "application/json-patch+json" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * Get all work items (typically tasks) for a specific sprint/iteration
+ * Filters by iteration path and optionally by work item type
+ */
+async function getSprintWorkItems(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { 
+    iterationPath, 
+    workItemType = "Task",
+    project,
+    fields = [
+      "System.Id",
+      "System.Title",
+      "System.State",
+      "System.AssignedTo",
+      "System.IterationPath",
+      "Custom.OriginalEstimate",
+      "Custom.RemainingWork",
+      "Custom.CompletedWork"
+    ]
+  } = args;
+
+  const targetProject = (project as string) || config.project;
+  const fieldList = (fields as string[]).join("], [");
+
+  const wiqlQuery = `
+    SELECT [${fieldList}]
+    FROM workitems
+    WHERE [System.TeamProject] = '${targetProject}'
+      AND [System.IterationPath] = '${iterationPath}'
+      AND [System.WorkItemType] = '${workItemType}'
+    ORDER BY [System.Id]
+  `;
+
+  const wiqlResponse = await client.post(
+    `${config.org}/${targetProject}/_apis/wit/wiql`,
+    { query: wiqlQuery },
+    { params: { "api-version": "7.0" } }
+  );
+
+  const workItemRefs = wiqlResponse.data.workItems || [];
+  
+  if (workItemRefs.length === 0) {
+    return { workItems: [], count: 0 };
+  }
+
+  // Batch fetch work item details
+  const ids = workItemRefs.map((ref: any) => ref.id).join(",");
+  const workItemsResponse = await client.get(
+    `${config.org}/${targetProject}/_apis/wit/workitems`,
+    {
+      params: {
+        ids,
+        fields: (fields as string[]).join(","),
+        "api-version": "7.0"
+      }
+    }
+  );
+
+  return {
+    workItems: workItemsResponse.data.value || [],
+    count: workItemsResponse.data.count || 0
+  };
+}
+
+/**
+ * List all process templates in the organization
+ */
+async function listProcesses(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  // Use the Process API (not project-specific)
+  const response = await client.get(
+    `${config.org}/_apis/process/processes`,
+    {
+      params: { "api-version": "7.0" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * Update a project to use a specific process template
+ */
+async function updateProjectProcess(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { projectId, processId } = args;
+  
+  if (!projectId) {
+    throw new Error("projectId is required");
+  }
+  if (!processId) {
+    throw new Error("processId is required");
+  }
+
+  // Update the project's process template
+  const response = await client.patch(
+    `${config.org}/_apis/projects/${projectId}`,
+    {
+      capabilities: {
+        processTemplate: {
+          templateTypeId: processId
+        }
+      }
+    },
+    {
+      params: { "api-version": "7.0" },
+      headers: { "Content-Type": "application/json" }
+    }
+  );
+
+  return response.data;
+}
+
+// Command-dispatch registry (Strategy pattern): adding a tool is one line here.
+const TOOL_HANDLERS: Record<string, ToolHandler> = {
+  "list-work-items": listWorkItems,
+  "get-work-item": getWorkItem,
+  "create-work-item": createWorkItem,
+  "clone-work-item": cloneWorkItem,
+  "update-work-item": updateWorkItem,
+  "update-effort-fields": updateEffortFields,
+  "get-sprint-work-items": getSprintWorkItems,
+  "list-sprints": listSprints,
+  "get-sprint": getSprint,
+  "create-sprint": createSprint,
+  "list-processes": listProcesses,
+  "update-project-process": updateProjectProcess,
+};
+
+
