@@ -245,7 +245,7 @@ async function dumpDatabaseToJson() {
   );
 
   fs.writeFileSync(
-    path.join(configDir, "users.json"),
+    path.join(seedDir, "users.json"),
     JSON.stringify({ users }, null, 2)
   );
   console.log(`  ✓ Dumped ${users.length} users to users.json`);
@@ -258,7 +258,7 @@ async function dumpDatabaseToJson() {
   );
 
   fs.writeFileSync(
-    path.join(configDir, "roles.json"),
+    path.join(seedDir, "roles.json"),
     JSON.stringify({ roles }, null, 2)
   );
   console.log(`  ✓ Dumped ${roles.length} roles to roles.json`);
@@ -272,7 +272,7 @@ async function dumpDatabaseToJson() {
   );
 
   fs.writeFileSync(
-    path.join(configDir, "capacity.json"),
+    path.join(seedDir, "capacity.json"),
     JSON.stringify({ capacity }, null, 2)
   );
   console.log(`  ✓ Dumped ${capacity.length} capacity records to capacity.json`);
@@ -304,7 +304,7 @@ async function dumpDatabaseToJson() {
   }
 
   fs.writeFileSync(
-    path.join(configDir, "projects.json"),
+    path.join(seedDir, "projects.json"),
     JSON.stringify({ projects }, null, 2)
   );
   console.log(`  ✓ Dumped ${projects.length} projects to projects.json`);
@@ -316,7 +316,7 @@ async function dumpDatabaseToJson() {
   );
 
   fs.writeFileSync(
-    path.join(process.cwd(), "users.credentials.json"),
+    path.join(seedDir, "users.credentials.json"),
     JSON.stringify({ credentials }, null, 2)
   );
   console.log(`  ✓ Dumped ${credentials.length} credentials to users.credentials.json`);
