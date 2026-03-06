@@ -202,11 +202,20 @@ export const neonMcpClient = {
     sql: string,
     params?: unknown[]
   ): Promise<T[]> {
+    const projectId = process.env.NEON_PROJECT_ID;
+    const branchId = process.env.NEON_BRANCH_ID;
+
+    if (!projectId || !branchId) {
+      throw new Error(
+        "NEON_PROJECT_ID and NEON_BRANCH_ID environment variables are required."
+      );
+    }
+
     try {
       // Neon MCP uses "run_sql" tool, not "query"
       const result = await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
-        projectId: process.env.NEON_PROJECT_ID || "super-butterfly-14628322",
-        branchId: process.env.NEON_BRANCH_ID || "br-muddy-fog-a88uzi0y",
+        projectId,
+        branchId,
         sql,
         params: params || []
       });
@@ -216,32 +225,56 @@ export const neonMcpClient = {
         return JSON.parse(result.content[0].text) as T[];
       }
       return result as unknown as T[];
-    } catch {
-      const result = await directQuery<T>(sql, params || []);
-      return result.rows;
+    } catch (error) {
+      if (process.env.NEON_DIRECT_FALLBACK === "true") {
+        const fallbackResult = await directQuery<T>(sql, params || []);
+        return fallbackResult.rows;
+      }
+      throw error;
     }
   },
 
   async migrate(sql: string): Promise<{ ok: boolean; message: string }> {
+    const projectId = process.env.NEON_PROJECT_ID;
+    const branchId = process.env.NEON_BRANCH_ID;
+
+    if (!projectId || !branchId) {
+      throw new Error(
+        "NEON_PROJECT_ID and NEON_BRANCH_ID environment variables are required."
+      );
+    }
+
     try {
       // Neon MCP uses "run_sql" for migrations
-      const result = await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
-        projectId: process.env.NEON_PROJECT_ID || "super-butterfly-14628322",
-        branchId: process.env.NEON_BRANCH_ID || "br-muddy-fog-a88uzi0y",
+      await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
+        projectId,
+        branchId,
         sql
       });
       return { ok: true, message: "Applied via Neon MCP" };
-    } catch {
-      await directQuery(sql);
-      return { ok: true, message: "Applied via direct Postgres fallback" };
+    } catch (error) {
+      if (process.env.NEON_DIRECT_FALLBACK === "true") {
+        await directQuery(sql);
+        return { ok: true, message: "Applied via direct Postgres fallback" };
+      }
+      throw error;
     }
   },
 
   async seed(sql: string): Promise<{ ok: boolean; message: string }> {
+    const projectId = process.env.NEON_PROJECT_ID;
+    const branchId = process.env.NEON_BRANCH_ID;
+
+    if (!projectId || !branchId) {
+      throw new Error(
+        "NEON_PROJECT_ID and NEON_BRANCH_ID environment variables are required."
+      );
+    }
+
     // Seed uses run_sql like migrate
-    const result = await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
-      projectId: process.env.NEON_PROJECT_ID || "super-butterfly-14628322",
-      branchId: process.env.NEON_BRANCH_ID || "br-muddy-fog-a88uzi0y",
+    await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
+      projectId,
+      branchId,
       sql
     });
     return { ok: true, message: "Seeded via Neon MCP" };
@@ -253,11 +286,20 @@ export const neonMcpClient = {
     now?: string;
     error?: string;
   }> {
+    const projectId = process.env.NEON_PROJECT_ID;
+    const branchId = process.env.NEON_BRANCH_ID;
+
+    if (!projectId || !branchId) {
+      throw new Error(
+        "NEON_PROJECT_ID and NEON_BRANCH_ID environment variables are required."
+      );
+    }
+
     try {
       // Test connectivity using run_sql
       const result = await this.callTool<{ content: Array<{ type: string; text: string }> }>("run_sql", {
-        projectId: process.env.NEON_PROJECT_ID || "super-butterfly-14628322",
-        branchId: process.env.NEON_BRANCH_ID || "br-muddy-fog-a88uzi0y",
+        projectId,
+        branchId,
         sql: "SELECT NOW()::text as now"
       });
       
@@ -273,21 +315,28 @@ export const neonMcpClient = {
         }
       }
       return { ok: true, mode: "neon-mcp" };
-    } catch {
-      const result = await directQuery<{ now: string }>(
-        "SELECT NOW()::text as now"
-      );
-      const now = result.rows[0]?.now;
-      if (now) {
+    } catch (error) {
+      if (process.env.NEON_DIRECT_FALLBACK === "true") {
+        const fallbackResult = await directQuery<{ now: string }>(
+          "SELECT NOW()::text as now"
+        );
+        const now = fallbackResult.rows[0]?.now;
+        if (now) {
+          return {
+            ok: true,
+            mode: "direct-postgres-fallback",
+            now
+          };
+        }
         return {
           ok: true,
-          mode: "direct-postgres-fallback",
-          now
+          mode: "direct-postgres-fallback"
         };
       }
       return {
-        ok: true,
-        mode: "direct-postgres-fallback"
+        ok: false,
+        mode: "neon-mcp",
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

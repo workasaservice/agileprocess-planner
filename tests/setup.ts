@@ -11,22 +11,12 @@ process.env.NODE_ENV = 'test';
 
 // Note: Do NOT mock fs globally - tests need real fs access for structure validation
 
-// Auto-suppress console output during tests
-const originalLog = console.log;
-const originalError = console.error;
-const originalWarn = console.warn;
-
 beforeAll(() => {
-  // Keep console for test reporting
-  // console.log = jest.fn();
-  // console.error = jest.fn();
-  // console.warn = jest.fn();
+  // Keep console output for test reporting
 });
 
 afterAll(() => {
-  // console.log = originalLog;
-  // console.error = originalError;
-  // console.warn = originalWarn;
+  // Nothing to restore
 });
 
 // Clear all mocks after each test

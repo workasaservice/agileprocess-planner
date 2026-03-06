@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { azureDevOpsMcpClient } from "../clients/azureDevOpsMcpClient";
 
 type TeamAssignmentResult = {
   userPrincipalName: string;

@@ -130,23 +130,24 @@ async function getUpcomingSprint(
 }
 
 /**
- * Get team capacity for sprint from database
+ * Get team capacity from database.
+ * Returns per-user capacity by joining config_capacity with config_users.
+ * Note: config_capacity stores general team capacity (not sprint-scoped).
  */
 async function getTeamCapacity(
-  db: Pool,
-  sprintId: string
+  db: Pool
 ): Promise<CapacityData[]> {
   const query = `
-    SELECT 
-      user_id,
-      user_name,
-      capacity_hours
-    FROM config_capacity
-    WHERE sprint_id = $1
-    ORDER BY user_name
+    SELECT
+      u.user_id,
+      u.display_name AS user_name,
+      c.total_capacity_hours AS capacity_hours
+    FROM config_capacity c
+    JOIN config_users u ON u.user_id = c.user_id
+    ORDER BY u.display_name
   `;
 
-  const result = await db.query(query, [sprintId]);
+  const result = await db.query(query);
   return result.rows;
 }
 
@@ -444,7 +445,7 @@ export async function validateSprintCapacity(
     console.log(`Validating sprint: ${sprint.iteration_path}\n`);
 
     // Get team capacity
-    const capacities = await getTeamCapacity(db, sprint.id);
+    const capacities = await getTeamCapacity(db);
     
     if (capacities.length === 0) {
       console.log("⚠️  WARNING: No team capacity data found for this sprint");

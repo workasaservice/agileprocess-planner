@@ -90,7 +90,7 @@ async function storeEffortHistory(
   db: Pool,
   sprintId: string,
   workItem: WorkItem,
-  organizationUrl: string,
+  _organizationUrl: string,
   projectName: string
 ): Promise<void> {
   const assignedTo = workItem.fields["System.AssignedTo"];
@@ -98,47 +98,44 @@ async function storeEffortHistory(
 
   const query = `
     INSERT INTO effort_tracking_history (
-      sprint_id,
       work_item_id,
-      work_item_type,
-      work_item_title,
       user_id,
-      original_estimate_hours,
-      remaining_work_hours,
-      completed_work_hours,
+      project_id,
+      sprint_id,
+      iteration_path,
+      work_item_title,
       work_item_state,
-      snapshot_date,
-      organization_url,
-      project_name
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_DATE, $10, $11)
-    ON CONFLICT (sprint_id, work_item_id, snapshot_date)
+      original_estimate,
+      remaining_work,
+      completed_work,
+      recorded_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, DATE_TRUNC('day', NOW()))
+    ON CONFLICT (work_item_id, recorded_at)
     DO UPDATE SET
-      remaining_work_hours = EXCLUDED.remaining_work_hours,
-      completed_work_hours = EXCLUDED.completed_work_hours,
+      remaining_work = EXCLUDED.remaining_work,
+      completed_work = EXCLUDED.completed_work,
       work_item_state = EXCLUDED.work_item_state,
-      user_id = EXCLUDED.user_id,
-      updated_at = CURRENT_TIMESTAMP
+      user_id = EXCLUDED.user_id
   `;
 
   await db.query(query, [
-    sprintId,
     workItem.id,
-    "Task",
-    workItem.fields["System.Title"],
     userId,
+    projectName,
+    sprintId,
+    workItem.fields["System.IterationPath"],
+    workItem.fields["System.Title"],
+    workItem.fields["System.State"],
     workItem.fields["Custom.OriginalEstimate"] || 0,
     workItem.fields["Custom.RemainingWork"] || 0,
     workItem.fields["Custom.CompletedWork"] || 0,
-    workItem.fields["System.State"],
-    organizationUrl,
-    projectName,
   ]);
 }
 
 /**
  * Calculate sprint effort summary
  */
-function calculateSprintSummary(
+export function calculateSprintSummary(
   sprintId: string,
   iterationPath: string,
   workItems: WorkItem[]
@@ -199,16 +196,16 @@ function calculateSprintSummary(
 async function storeSprintSummary(
   db: Pool,
   summary: SprintEffortSummary,
-  organizationUrl: string,
+  _organizationUrl: string,
   projectName: string
 ): Promise<void> {
   // First, get existing burndown data if any
   const existingQuery = `
     SELECT burndown_data
     FROM sprint_effort_summary
-    WHERE sprint_id = $1
+    WHERE project_id = $1 AND sprint_id = $2
   `;
-  const existingResult = await db.query(existingQuery, [summary.sprintId]);
+  const existingResult = await db.query(existingQuery, [projectName, summary.sprintId]);
 
   let burndownData = summary.burndownData;
   if (existingResult.rows.length > 0 && existingResult.rows[0].burndown_data) {
@@ -230,47 +227,38 @@ async function storeSprintSummary(
 
   const query = `
     INSERT INTO sprint_effort_summary (
+      project_id,
       sprint_id,
       iteration_path,
       total_estimated_hours,
       total_remaining_hours,
       total_completed_hours,
       task_count,
-      tasks_with_estimates,
-      tasks_in_progress,
-      tasks_completed,
+      completed_task_count,
       burndown_data,
-      last_sync_date,
-      organization_url,
-      project_name
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_DATE, $11, $12)
-    ON CONFLICT (sprint_id)
+      last_updated
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
+    ON CONFLICT (project_id, sprint_id)
     DO UPDATE SET
       total_estimated_hours = EXCLUDED.total_estimated_hours,
       total_remaining_hours = EXCLUDED.total_remaining_hours,
       total_completed_hours = EXCLUDED.total_completed_hours,
       task_count = EXCLUDED.task_count,
-      tasks_with_estimates = EXCLUDED.tasks_with_estimates,
-      tasks_in_progress = EXCLUDED.tasks_in_progress,
-      tasks_completed = EXCLUDED.tasks_completed,
+      completed_task_count = EXCLUDED.completed_task_count,
       burndown_data = EXCLUDED.burndown_data,
-      last_sync_date = CURRENT_DATE,
-      updated_at = CURRENT_TIMESTAMP
+      last_updated = CURRENT_TIMESTAMP
   `;
 
   await db.query(query, [
+    projectName,
     summary.sprintId,
     summary.iterationPath,
     summary.totalEstimated,
     summary.totalRemaining,
     summary.totalCompleted,
     summary.taskCount,
-    summary.tasksWithEstimates,
-    summary.tasksInProgress,
     summary.tasksCompleted,
     JSON.stringify(burndownData),
-    organizationUrl,
-    projectName,
   ]);
 }
 
@@ -308,7 +296,7 @@ async function calculateEstimationAccuracy(
   db: Pool,
   sprintId: string,
   workItems: WorkItem[],
-  organizationUrl: string,
+  _organizationUrl: string,
   projectName: string
 ): Promise<void> {
   for (const item of workItems) {
@@ -332,33 +320,24 @@ async function calculateEstimationAccuracy(
     const query = `
       INSERT INTO estimation_accuracy (
         sprint_id,
+        project_id,
         work_item_id,
-        work_item_type,
-        original_estimate_hours,
-        actual_hours,
-        variance_hours,
-        variance_percentage,
-        organization_url,
-        project_name
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      ON CONFLICT (work_item_id)
-      DO UPDATE SET
-        actual_hours = EXCLUDED.actual_hours,
-        variance_hours = EXCLUDED.variance_hours,
-        variance_percentage = EXCLUDED.variance_percentage,
-        updated_at = CURRENT_TIMESTAMP
+        original_estimate,
+        actual_completed,
+        variance,
+        variance_percentage
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT DO NOTHING
     `;
 
     await db.query(query, [
       sprintId,
+      projectName,
       item.id,
-      "Task",
       original,
       actual,
       variance,
       variancePercentage,
-      organizationUrl,
-      projectName,
     ]);
   }
 }

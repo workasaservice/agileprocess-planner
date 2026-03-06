@@ -11,11 +11,13 @@ import * as path from "path";
 
 interface EffortFieldConfig {
   name: string;
-  referenceName: string;
+  displayName: string;
   description: string;
   type: string;
-  required: boolean;
+  isRequired: boolean;
   defaultValue?: number;
+  layoutGroup?: string;
+  layoutOrder?: number;
 }
 
 interface EffortTrackingConfig {
@@ -25,7 +27,7 @@ interface EffortTrackingConfig {
     createNewIfNotExists?: boolean;
     name: string;
     description: string;
-    inheritsFrom: string;
+    baseProcess: string;
     workItemTypes: {
       Task: {
         fields: EffortFieldConfig[];
@@ -83,14 +85,14 @@ async function createInheritedProcess(
   mcpClient: AzureDevOpsMcpClient,
   config: EffortTrackingConfig
 ): Promise<string> {
-  const { name, description, inheritsFrom } = config.processTemplate;
+  const { name, description, baseProcess } = config.processTemplate;
 
   console.log(`Creating inherited process: ${name}`);
 
   const result = await mcpClient.callTool("create-process", {
     name,
     description,
-    parentProcessTypeId: inheritsFrom,
+    parentProcessTypeId: baseProcess,
   });
 
   console.log(`✓ Process created: ${name} (ID: ${result.typeId})`);
@@ -106,24 +108,24 @@ async function addCustomField(
   workItemType: string,
   field: EffortFieldConfig
 ): Promise<void> {
-  console.log(`  Adding field: ${field.name} (${field.referenceName})`);
+  console.log(`  Adding field: ${field.displayName} (${field.name})`);
 
   try {
     await mcpClient.callTool("add-field-to-work-item-type", {
       processId,
       witRefName: workItemType,
-      referenceName: field.referenceName,
-      name: field.name,
+      referenceName: field.name,
+      name: field.displayName,
       description: field.description,
       type: field.type,
-      required: field.required,
+      required: field.isRequired,
       defaultValue: field.defaultValue,
     });
 
-    console.log(`    ✓ Field added: ${field.name}`);
+    console.log(`    ✓ Field added: ${field.displayName}`);
   } catch (error: any) {
     if (error.message?.includes("already exists")) {
-      console.log(`    ⊙ Field already exists: ${field.name}`);
+      console.log(`    ⊙ Field already exists: ${field.displayName}`);
     } else {
       throw error;
     }
@@ -168,7 +170,7 @@ async function configureFieldLayout(
         processId,
         witRefName: workItemType,
         groupId: layout.group,
-        referenceName: field.referenceName,
+        referenceName: field.name,
       });
 
       console.log(`    ✓ Field added to group: ${field.name}`);
@@ -206,49 +208,55 @@ async function applyProcessToProject(
 
 /**
  * Store effort tracking configuration in database
+ * Inserts one row per field into effort_tracking_config to match the schema.
  */
 async function storeConfigInDatabase(
   db: Pool,
   config: EffortTrackingConfig,
   processId: string,
-  organizationUrl: string,
-  projectName: string
+  _organizationUrl: string,
+  _projectName: string
 ): Promise<void> {
   console.log(`Storing configuration in database...`);
 
-  const query = `
+  const insertFieldQuery = `
     INSERT INTO effort_tracking_config (
-      organization_url,
-      project_name,
-      process_template_id,
-      process_template_name,
-      field_configuration,
-      automation_rules,
-      validation_rules,
-      reporting_config,
-      is_active
+      process_id,
+      work_item_type,
+      field_name,
+      field_display_name,
+      field_type,
+      default_value,
+      is_required,
+      layout_group,
+      layout_order
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    ON CONFLICT (organization_url, project_name)
+    ON CONFLICT (process_id, work_item_type, field_name)
     DO UPDATE SET
-      process_template_id = EXCLUDED.process_template_id,
-      field_configuration = EXCLUDED.field_configuration,
-      automation_rules = EXCLUDED.automation_rules,
-      validation_rules = EXCLUDED.validation_rules,
-      reporting_config = EXCLUDED.reporting_config,
+      field_display_name = EXCLUDED.field_display_name,
+      field_type = EXCLUDED.field_type,
+      default_value = EXCLUDED.default_value,
+      is_required = EXCLUDED.is_required,
+      layout_group = EXCLUDED.layout_group,
+      layout_order = EXCLUDED.layout_order,
       updated_at = CURRENT_TIMESTAMP
   `;
 
-  await db.query(query, [
-    organizationUrl,
-    projectName,
-    processId,
-    config.processTemplate.name,
-    JSON.stringify(config.processTemplate.workItemTypes.Task.fields),
-    JSON.stringify(config.automation),
-    JSON.stringify(config.validation),
-    JSON.stringify(config.reporting),
-    true,
-  ]);
+  const taskFields = config.processTemplate.workItemTypes.Task.fields;
+
+  for (const field of taskFields) {
+    await db.query(insertFieldQuery, [
+      processId,
+      "Task",
+      field.name,
+      field.displayName,
+      field.type,
+      field.defaultValue ?? null,
+      field.isRequired,
+      field.layoutGroup ?? null,
+      field.layoutOrder ?? null,
+    ]);
+  }
 
   console.log(`✓ Configuration stored in database`);
 }

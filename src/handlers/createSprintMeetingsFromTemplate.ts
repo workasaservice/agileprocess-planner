@@ -158,9 +158,6 @@ export async function createSprintMeetingsFromTemplate(options: {
     console.log(`\n--- Processing Project: ${project.projectName} ---`);
 
     // Validate template configuration for this project
-    console.log(`\n--- Processing Project: ${project.projectName} ---`);
-
-    // Validate template configuration for this project
     try {
       validateTemplateConfig(meetingsConfig, project.projectName);
     } catch (err: any) {

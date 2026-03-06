@@ -46,8 +46,12 @@ export function getPool(): Pool {
       ssl:
         process.env.DB_SSL === "false"
           ? false
-          : {
+          : process.env.DB_SSL_INSECURE === "true"
+          ? {
               rejectUnauthorized: false,
+            }
+          : {
+              rejectUnauthorized: true,
             },
     });
   }
