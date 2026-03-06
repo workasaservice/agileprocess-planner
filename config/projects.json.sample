@@ -1,0 +1,22 @@
+{
+  "projects": [
+    {
+      "projectId": "project-id-1",
+      "projectName": "ProjectName",
+      "projectFullName": "Project Full Name",
+      "organization": "organization-name",
+      "teamId": "team-id-1",
+      "teamName": "Team Name",
+      "members": ["user-id-1"],
+      "iterations": [
+        {
+          "sprintName": "Sprint 1",
+          "iterationPath": "ProjectName\\Sprint 1",
+          "iterationId": "iteration-id-1",
+          "startDate": "2024-01-01",
+          "finishDate": "2024-01-14"
+        }
+      ]
+    }
+  ]
+}
