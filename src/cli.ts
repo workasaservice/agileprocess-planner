@@ -1,3 +1,7 @@
+// Copyright (c) 2026 AgilePlanner Contributors
+// Licensed under the MIT License. See LICENSE file for details.
+
+import { loadConfiguration, loadConfigurationAsync, isPostgresMode } from "./lib/configLoader";
 import { activateAgent } from "./agent";
 
 async function readStdin(): Promise<string> {
@@ -13,6 +17,29 @@ async function readStdin(): Promise<string> {
 }
 
 async function main() {
+  // Initialize configuration
+  try {
+    const mode = isPostgresMode() ? "postgres" : "json";
+    console.error(`Loading configuration from ${mode} source...`);
+    
+    if (isPostgresMode()) {
+      // Async loading for Postgres mode
+      await loadConfigurationAsync();
+    } else {
+      // Synchronous loading for JSON mode
+      loadConfiguration();
+    }
+    
+    console.error("Configuration loaded successfully.");
+  } catch (error) {
+    console.error(
+      "Failed to initialize configuration:",
+      error instanceof Error ? error.message : String(error)
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   const [command, ...args] = process.argv.slice(2);
   if (!command) {
     console.error("Usage: ops360-ai <command> [--flag value]");

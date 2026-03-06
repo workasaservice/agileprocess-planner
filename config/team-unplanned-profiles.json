@@ -1,0 +1,74 @@
+{
+  "_comment": "Team-specific profiles for unplanned work automation",
+  "_version": "1.0.0",
+  
+  "profiles": {
+    "scrum-standard": {
+      "description": "Standard unplanned work buffer allocation",
+      "taskStructure": "individual-per-member",
+      "bufferPolicy": {
+        "enabled": true,
+        "bufferPercentage": 20,
+        "description": "Allocate 20% of sprint capacity for unplanned work"
+      },
+      "categories": [
+        {
+          "name": "Bug Fixes",
+          "description": "Critical and high-priority bug fixes discovered during sprint",
+          "allocatedPercentage": 8
+        },
+        {
+          "name": "Change Requests",
+          "description": "Approved changes requested by stakeholders",
+          "allocatedPercentage": 7
+        },
+        {
+          "name": "Technical Debt",
+          "description": "Refactoring and technical improvements",
+          "allocatedPercentage": 3
+        },
+        {
+          "name": "Operational Support",
+          "description": "Unplanned support requests and infrastructure work",
+          "allocatedPercentage": 2
+        }
+      ]
+    }
+  },
+  
+  "teamAssignments": {
+    "MotherOps-Alpha Team": {
+      "profileName": "scrum-standard",
+      "bufferHoursPerMember": 10,
+      "customizations": {
+        "overrideBufferPercentage": 25,
+        "notes": "Alpha team typically handles more unplanned work due to legacy system support"
+      }
+    },
+    "MotherOps-Beta Team": {
+      "profileName": "scrum-standard",
+      "bufferHoursPerMember": 8,
+      "customizations": {
+        "overrideBufferPercentage": 15,
+        "notes": "Beta team focuses on new features with minimal unplanned work"
+      }
+    }
+  },
+  
+  "bufferAllocationState": {
+    "MotherOps-Alpha Team": {
+      "lastCalculated": null,
+      "currentBufferPercentage": 25,
+      "bufferHoursPerMember": 10,
+      "totalTeamBufferHours": null,
+      "lastUpdated": null
+    },
+    "MotherOps-Beta Team": {
+      "lastCalculated": null,
+      "currentBufferPercentage": 15,
+      "bufferHoursPerMember": 8,
+      "totalTeamBufferHours": null,
+      "lastUpdated": null
+    }
+  }
+}

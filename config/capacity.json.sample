@@ -1,0 +1,11 @@
+{
+  "capacity": [
+    {
+      "userId": "user-id-1",
+      "roleId": "role-id-1",
+      "focusFactor": 0.7,
+      "productiveHoursPerSprint": 56,
+      "totalCapacityHours": 80
+    }
+  ]
+}

@@ -8,6 +8,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "cli": "ts-node src/cli.ts",
+    "db:e2e": "ts-node src/db/e2eCheck.ts",
+    "db:migrate": "ts-node src/db/migrate.ts",
+    "db:migrate-json": "ts-node src/db/migrateJsonDocuments.ts",
+    "db:seed": "ts-node src/db/seed.ts",
+    "db:health": "ts-node src/db/healthcheck.ts",
     "go": "ts-node src/smartCli.ts",
     "dev": "ts-node src/agent.ts",
     "start": "node dist/agent.js",
@@ -15,12 +20,15 @@
     "validate-graph-mcp": "ts-node src/validateGraphMcpConnection.ts",
     "test-mcp-protocol": "ts-node src/testMcpProtocol.ts",
     "create-users-mcp": "ts-node src/createUsersViaMcp.ts",
-    "create-users": "/usr/bin/python3 scripts/createAzureUsers.py",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "create-users": "ts-node src/cli.ts create-users",
+    "add-users-to-ado": "ts-node src/handlers/addUsersToAdoProject.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "description": "AgileProcess Planner agent (AgilePlanner).",
   "dependencies": {
     "@azure/identity": "^4.13.0",
@@ -28,10 +36,15 @@
     "@modelcontextprotocol/sdk": "^1.27.1",
     "axios": "^1.13.5",
     "dotenv": "^17.2.4",
-    "isomorphic-fetch": "^3.0.0"
+    "isomorphic-fetch": "^3.0.0",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.2.3",
+    "@types/pg": "^8.15.5",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

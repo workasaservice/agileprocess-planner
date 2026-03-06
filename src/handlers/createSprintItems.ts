@@ -1,3 +1,6 @@
+// Copyright (c) 2026 AgilePlanner Contributors
+// Licensed under the MIT License. See LICENSE file for details.
+
 import fs from "fs";
 import path from "path";
 

@@ -1,5 +1,9 @@
+// Copyright (c) 2026 AgilePlanner Contributors
+// Licensed under the MIT License. See LICENSE file for details.
+
 import dotenv from "dotenv";
 
+import { loadConfiguration, loadConfigurationAsync, isPostgresMode } from "./lib/configLoader";
 import { planBacklog } from "./handlers/planBacklog";
 import { createDevopsItems } from "./handlers/createDevopsItems";
 import { createBacklogItems } from "./handlers/createBacklogItems";
@@ -9,6 +13,12 @@ import { planSprint } from "./handlers/planSprint";
 import { createUsers } from "./handlers/createUsers";
 import { assignUsersToGroups } from "./handlers/assignUsersToGroups";
 import { assignUsersToDevOpsTeams } from "./handlers/assignUsersToDevOpsTeams";
+import { createSprints } from "./handlers/createSprints";
+import { createSprintMeetings } from "./handlers/createSprintMeetings";
+import { createSprintMeetingsWithProfiles } from "./handlers/createSprintMeetingsWithProfiles";
+import { createSprintMeetingsFromTemplate } from "./handlers/createSprintMeetingsFromTemplate";
+import { createUnplannedItems } from "./handlers/createUnplannedItems";
+import { effortInit, effortSync, effortValidate } from "./handlers/effortTrackingCommands";
 
 dotenv.config();
 
@@ -94,6 +104,14 @@ async function routeCommand(
     "create-users": createUsers,
     "assign-users-to-groups": assignUsersToGroups,
     "assign-users-to-devops-teams": assignUsersToDevOpsTeams,
+    "create-sprints": createSprints,
+    "create-sprint-meetings": createSprintMeetings,
+    "create-sprint-meetings-with-profiles": createSprintMeetingsWithProfiles,
+    "create-sprint-meetings-from-template": createSprintMeetingsFromTemplate,
+    "create-unplanned-items": createUnplannedItems,
+    "effort-init": effortInit,
+    "effort-sync": effortSync,
+    "effort-validate": effortValidate,
   };
 
   // Check if command is registered
@@ -138,6 +156,28 @@ async function routeCommand(
 export async function activateAgent(): Promise<any> {
   console.log("AgileProcess Planner Ready!");
 
+  // Initialize configuration
+  try {
+    const mode = isPostgresMode() ? "postgres" : "json";
+    console.log(`Loading configuration from ${mode} source...`);
+    
+    if (isPostgresMode()) {
+      // Async loading for Postgres mode
+      await loadConfigurationAsync();
+    } else {
+      // Synchronous loading for JSON mode
+      loadConfiguration();
+    }
+    
+    console.log("Configuration loaded successfully.");
+  } catch (error) {
+    console.error(
+      "Failed to initialize configuration:",
+      error instanceof Error ? error.message : String(error)
+    );
+    throw error;
+  }
+
   return {
     routeCommand,
     commands: {
@@ -167,6 +207,21 @@ export async function activateAgent(): Promise<any> {
       },
       "assign-users-to-devops-teams": async (input: any) => {
         return await assignUsersToDevOpsTeams(input);
+      },
+      "create-sprints": async (input: any) => {
+        return await createSprints(input);
+      },
+      "create-sprint-meetings": async (input: any) => {
+        return await createSprintMeetings(input);
+      },
+      "create-sprint-meetings-with-profiles": async (input: any) => {
+        return await createSprintMeetingsWithProfiles(input);
+      },
+      "create-sprint-meetings-from-template": async (input: any) => {
+        return await createSprintMeetingsFromTemplate(input);
+      },
+      "create-unplanned-items": async (input: any) => {
+        return await createUnplannedItems(input);
       },
     },
   };

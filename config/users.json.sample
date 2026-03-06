@@ -1,0 +1,18 @@
+{
+  "users": [
+    {
+      "userId": "user-id-1",
+      "displayName": "Display Name",
+      "userPrincipalName": "user@example.com",
+      "mailNickname": "user",
+      "givenName": "First",
+      "surname": "Last",
+      "jobTitle": "Job Title",
+      "department": "Department",
+      "usageLocation": "US",
+      "accountEnabled": true,
+      "roleId": "role-id-1",
+      "projectIds": ["project-id-1"]
+    }
+  ]
+}

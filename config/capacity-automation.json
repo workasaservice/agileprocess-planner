@@ -1,0 +1,33 @@
+{
+  "description": "Automation configuration for creating year-long sprint iterations",
+  "schedule": {
+    "startDate": "2026-03-09",
+    "endDate": "2026-12-31",
+    "sprintDurationWeeks": 2,
+    "workingDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "namingTemplate": "Sprint {date}",
+    "dateFormat": "YYYY-MM-DD"
+  },
+  "projects": [
+    {
+      "project": "MotherOps-Alpha",
+      "team": "MotherOps-Alpha Team",
+      "enabled": true
+    },
+    {
+      "project": "MotherOps-Beta",
+      "team": "MotherOps-Beta Team",
+      "enabled": true
+    }
+  ],
+  "execution": {
+    "dryRun": false,
+    "skipExisting": true,
+    "outputFile": "config/generated-iterations.json"
+  },
+  "validation": {
+    "requireMondayStart": true,
+    "requireFridayEnd": true,
+    "maxSprintsPerProject": 30
+  }
+}

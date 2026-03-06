@@ -14,6 +14,7 @@ import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
 
+import { loadConfiguration, loadConfigurationAsync, isPostgresMode } from "./lib/configLoader";
 import { azureDevOpsMcpClient, resolveAzureDevOpsMcpConfig } from "./clients/azureDevOpsMcpClient";
 
 dotenv.config();
@@ -312,6 +313,29 @@ function parseFlags(args: string[]): { prompt: string; flags: Record<string, str
 }
 
 async function main() {
+  // Initialize configuration
+  try {
+    const mode = isPostgresMode() ? "postgres" : "json";
+    console.error(`Loading configuration from ${mode} source...`);
+    
+    if (isPostgresMode()) {
+      // Async loading for Postgres mode
+      await loadConfigurationAsync();
+    } else {
+      // Synchronous loading for JSON mode
+      loadConfiguration();
+    }
+    
+    console.error("Configuration loaded successfully.");
+  } catch (error) {
+    console.error(
+      "Failed to initialize configuration:",
+      error instanceof Error ? error.message : String(error)
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   const { prompt, flags } = parseFlags(process.argv.slice(2));
 
   if (!prompt && !flags["file"] && process.stdin.isTTY) {

@@ -1,0 +1,12 @@
+{
+  "roles": [
+    {
+      "roleId": "role-id-1",
+      "roleName": "Developer",
+      "subtitle": "Software Developer",
+      "description": "Develops and maintains software applications",
+      "defaultFocusFactor": 0.7,
+      "defaultActivity": "Development"
+    }
+  ]
+}

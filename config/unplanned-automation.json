@@ -1,0 +1,67 @@
+{
+  "_comment": "UnPlanned work automation configuration",
+  "version": "1.0.0",
+  "approach": "hybrid",
+  "description": "Automation for creating UnPlanned work items (capacity for unexpected tasks) with team member task assignments",
+  "settings": {
+    "enabled": true,
+    "createPerSprint": true,
+    "createPerTeam": true,
+    "assignTasksToMembers": true,
+    "estimatedHoursPerTask": 2,
+    "tags": ["unplanned", "contingency", "buffer", "capacity"]
+  },
+  "issueTemplate": {
+    "type": "Issue",
+    "titleTemplate": "UnPlanned - {sprintName}",
+    "descriptionTemplate": "Capacity for unexpected work, change requests, and contingency planning.\n\nThis issue tracks unplanned work items that arise during the sprint that were not part of the original commitment.\n\nTeam has allocated buffer capacity for:\n- Urgent bug fixes\n- Change requests from stakeholders\n- Technical debt mitigation\n- Operational support tasks",
+    "tags": []
+  },
+  "taskTemplate": {
+    "type": "Task",
+    "titleTemplate": "UnPlanned Capacity - {memberName}",
+    "descriptionTemplate": "Contingency capacity allocated to {memberName} for unplanned work during {sprintName}.\n\nThis task represents buffer time allocated for unexpected tasks or change requests that may arise.",
+    "estimatedHours": 2,
+    "tags": ["unplanned", "contingency"]
+  },
+  "profileSettings": {
+    "enabled": true,
+    "profileFile": "config/team-unplanned-profiles.json",
+    "profiles": {
+      "scrum-standard": {
+        "description": "Standard buffer allocation for unplanned work",
+        "taskStructure": "individual-per-member",
+        "bufferPercentage": 20
+      }
+    }
+  },
+  "templateSettings": {
+    "enabled": false,
+    "templates": {
+      "MotherOps-Alpha": {
+        "templateWorkItemId": null,
+        "includeChildren": true
+      },
+      "MotherOps-Beta": {
+        "templateWorkItemId": null,
+        "includeChildren": true
+      }
+    }
+  },
+  "projects": [
+    {
+      "projectId": "project-1-alpha",
+      "projectName": "MotherOps-Alpha",
+      "teamName": "MotherOps-Alpha Team",
+      "enabled": true,
+      "overrideEstimatedHours": 2.5
+    },
+    {
+      "projectId": "project-2-beta",
+      "projectName": "MotherOps-Beta",
+      "teamName": "MotherOps-Beta Team",
+      "enabled": true,
+      "overrideEstimatedHours": 3
+    }
+  ]
+}

@@ -1,79 +1,37 @@
 #!/usr/bin/env python3
 """
-createAzureUsers.py
--------------------
-Reads user definitions from a JSON file and bulk-creates them in Azure AD
-via Microsoft Graph API using MSAL client-credentials flow.
+❌ DEPRECATED: createAzureUsers.py
 
-Credentials are loaded from .env (project root) and/or environment variables.
+This Python script made direct requests to Microsoft Graph API, violating the MCP-only policy.
 
-Usage:
-  python3 scripts/createAzureUsers.py                     # uses users.json
-  python3 scripts/createAzureUsers.py --file users.json   # explicit file
-  python3 scripts/createAzureUsers.py --dry-run           # validate only
+✅ MIGRATION: Use the MCP-only TypeScript handler instead
+
+BEFORE (Direct API calls - DEPRECATED):
+  python3 scripts/createAzureUsers.py --file users.json
+
+AFTER (MCP-only - RECOMMENDED):
+  npm run create-users -- --file users.json
+
+The TypeScript handler uses microsoftGraphRealMcpClient for all operations.
+No direct HTTP calls. Full MCP-only compliance per docs/MCP_ONLY_POLICY.md
+
+See:
+- src/handlers/createUsers.ts
+- src/clients/microsoftGraphRealMcpClient.ts
+- docs/MCP_ONLY_POLICY.md
 """
 
-import json
-import os
 import sys
-import argparse
-from pathlib import Path
 
-from typing import Optional, Tuple, List
-
-import msal
-import requests
-
-# ─── Config ──────────────────────────────────────────────────────────────────
-
-# Resolve project root relative to this script
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-
-GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0"
-
-
-def load_env(env_path: Path) -> dict:
-    """Parse a .env file and return key/value pairs (does not modify os.environ)."""
-    env: dict = {}
-    if not env_path.exists():
-        return env
-    for line in env_path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if "=" not in line:
-            continue
-        key, _, value = line.partition("=")
-        env[key.strip()] = value.strip().strip('"').strip("'")
-    return env
-
-
-def resolve_config() -> dict:
-    """Merge .env file values with real environment variables (env vars win)."""
-    file_env = load_env(PROJECT_ROOT / ".env")
-
-    def get(key: str, default: str = "") -> str:
-        return os.environ.get(key) or file_env.get(key) or default
-
-    return {
-        "tenant_id":     get("AZURE_TENANT_ID"),
-        "client_id":     get("AZURE_CLIENT_ID"),
-        "client_secret": get("AZURE_CLIENT_SECRET"),
-        "scope":         get("AZURE_GRAPH_SCOPE", "https://graph.microsoft.com/.default"),
-    }
-
-
-# ─── Authentication ───────────────────────────────────────────────────────────
-
-def get_access_token(config: dict) -> str:
-    """Acquire an access token using MSAL client-credentials flow."""
-    required = ["tenant_id", "client_id", "client_secret"]
-    missing = [k for k in required if not config.get(k)]
-    if missing:
-        sys.exit(
-            f"\n❌ Missing credentials: {', '.join(missing)}\n"
-            "   Set them in your .env file or as environment variables.\n"
-        )
+print("❌ ERROR: createAzureUsers.py is deprecated.")
+print("")
+print("✅ Use the MCP-only TypeScript handler instead:")
+print("   npm run create-users -- --file users.json")
+print("")
+print("The Python script has been removed to enforce MCP-only architecture.")
+print("All Microsoft Graph operations now flow through the MCP client.")
+print("")
+sys.exit(1)
 
     authority = f"https://login.microsoftonline.com/{config['tenant_id']}"
     app = msal.ConfidentialClientApplication(
@@ -294,3 +252,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+>>>>>>> 715f197 (security: remove all hardcoded secrets detected by GitGuardian)

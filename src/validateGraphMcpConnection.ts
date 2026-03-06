@@ -18,9 +18,15 @@ const DEMO_USER = {
   department:               "Engineering",
   usageLocation:            "US",
   accountEnabled:           true,
-  password:                 process.env.DEMO_USER_PASSWORD || "DemoTest123!",
+  password:                 process.env.DEMO_USER_PASSWORD!,
   forceChangePasswordNextSignIn: true,
 };
+
+if (!process.env.DEMO_USER_PASSWORD) {
+  console.error("❌ DEMO_USER_PASSWORD environment variable is required");
+  console.error("   Set it in your .env file");
+  process.exit(1);
+}
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
