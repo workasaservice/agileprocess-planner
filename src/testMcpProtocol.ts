@@ -14,10 +14,16 @@ const TEST_USER = {
   jobTitle: "MCP Protocol Tester",
   department: "Engineering",
   usageLocation: "US",
-  password: process.env.TEST_USER_PASSWORD || "McpTest123!",
+  password: process.env.TEST_USER_PASSWORD!,
   accountEnabled: true,
   forceChangePasswordNextSignIn: true,
 };
+
+if (!process.env.TEST_USER_PASSWORD) {
+  console.error("❌ TEST_USER_PASSWORD environment variable is required");
+  console.error("   Set it in your .env file");
+  process.exit(1);
+}
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 

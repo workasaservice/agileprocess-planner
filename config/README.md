@@ -227,9 +227,9 @@ root/
 {
   "credentials": [
     {
-      "userId": "tom-baker",
-      "userPrincipalName": "tom.baker@workasaservice.ai",
-      "password": "TempTom@123!"
+      "userId": "user-id",
+      "userPrincipalName": "user@example.com",
+      "password": "SecurePassword123!"
     }
   ]
 }
@@ -311,9 +311,9 @@ User "Tom Baker" is represented across THREE files:
 **users.credentials.json** (linked by userId):
 ```json
 {
-  "userId": "tom-baker",
-  "userPrincipalName": "tom.baker@workasaservice.ai",
-  "password": "TempTom@123!"
+  "userId": "user-id",
+  "userPrincipalName": "user@example.com",
+  "password": "SecurePassword123!"
 }
 ```
 
