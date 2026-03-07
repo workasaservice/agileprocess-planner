@@ -406,7 +406,7 @@ async function listSprints(
   config: AzureDevOpsMcpConfig,
   args: Record<string, unknown>
 ) {
-  const team = args.team || "Default";
+  const team = args.team || args.teamId || "Default";
 
   const response = await client.get(
     `${config.org}/${config.project}/${team}/_apis/work/teamsettings/iterations`,
@@ -423,7 +423,8 @@ async function getSprint(
   config: AzureDevOpsMcpConfig,
   args: Record<string, unknown>
 ) {
-  const { id, team = "Default" } = args;
+  const { id } = args;
+  const team = args.team || args.teamId || "Default";
 
   const response = await client.get(
     `${config.org}/${config.project}/${team}/_apis/work/teamsettings/iterations/${id}`,
@@ -440,7 +441,8 @@ async function createSprint(
   config: AzureDevOpsMcpConfig,
   args: Record<string, unknown>
 ) {
-  const { name, startDate, finishDate, team = "Default", project } = args;
+  const { name, startDate, finishDate, project } = args;
+  const team = args.team || args.teamId || "Default";
   
   const targetProject = project || config.project;
 
@@ -669,6 +671,286 @@ async function updateProjectProcess(
   return response.data;
 }
 
+/**
+ * Create a new inherited process template in the organization
+ * 
+ * @param processId Derived from an existing process type (e.g., "scrum", "agile")
+ * @returns Created process object with id and name
+ */
+async function createProcess(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { 
+    name, 
+    description = "", 
+    parentProcessId,
+    org = config.org
+  } = args;
+
+  if (!name) {
+    throw new Error("name is required for process creation");
+  }
+  if (!parentProcessId) {
+    throw new Error("parentProcessId is required (e.g., 'scrum' or 'agile')");
+  }
+
+  // Create new inherited process from parent
+  const response = await client.post(
+    `${org}/_apis/process/processes`,
+    {
+      name,
+      description,
+      parentProcessTypeId: parentProcessId,
+      isDefault: false
+    },
+    {
+      params: { "api-version": "7.0" },
+      headers: { "Content-Type": "application/json" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * Add a custom field to a work item type within a process
+ * 
+ * @param fieldType Type code: "String", "Integer", "Double", "PlainText", "DateTime", "TreePath"
+ */
+async function addFieldToWorkItemType(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const {
+    processId,
+    workItemTypeRefName, // e.g., "Microsoft.VSTS.WorkItemTypes.UserStory"
+    fieldName,
+    fieldReferenceName, // e.g., "Custom.OriginalEstimate"
+    fieldType = "String", // String, Integer, Double, PlainText, etc.
+    isRequired = false,
+    org = config.org
+  } = args;
+
+  if (!processId || !workItemTypeRefName || !fieldName || !fieldReferenceName) {
+    throw new Error(
+      "processId, workItemTypeRefName, fieldName, and fieldReferenceName are all required"
+    );
+  }
+
+  // Add the field to the work item type in the process
+  const response = await client.post(
+    `${org}/_apis/process/processes/${processId}/workitemtypes/${workItemTypeRefName}/fields`,
+    {
+      name: fieldName,
+      referenceName: fieldReferenceName,
+      type: fieldType,
+      isRequired,
+      description: `Custom field: ${fieldName}`
+    },
+    {
+      params: { "api-version": "7.0" },
+      headers: { "Content-Type": "application/json" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * Add a group (section/page container) to a work item type's layout
+ */
+async function addGroupToWorkItemType(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const {
+    processId,
+    workItemTypeRefName,
+    groupName, // e.g., "Effort Tracking"
+    pageId = "Details", // Page to add group to
+    org = config.org
+  } = args;
+
+  if (!processId || !workItemTypeRefName || !groupName) {
+    throw new Error("processId, workItemTypeRefName, and groupName are required");
+  }
+
+  // Create the new group/section
+  const response = await client.post(
+    `${org}/_apis/process/processes/${processId}/workitemtypes/${workItemTypeRefName}/layout/pages/${pageId}/sections/${groupName}`,
+    {
+      id: groupName,
+      name: groupName,
+      overridden: false
+    },
+    {
+      params: { "api-version": "7.0" },
+      headers: { "Content-Type": "application/json" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * Add a field to a group (section) in a work item type's layout
+ */
+async function addFieldToGroup(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const {
+    processId,
+    workItemTypeRefName,
+    pageId = "Details",
+    groupId, // Section/group name
+    fieldReferenceName, // e.g., "Custom.OriginalEstimate"
+    order = 0,
+    org = config.org
+  } = args;
+
+  if (
+    !processId ||
+    !workItemTypeRefName ||
+    !groupId ||
+    !fieldReferenceName
+  ) {
+    throw new Error(
+      "processId, workItemTypeRefName, groupId, and fieldReferenceName are required"
+    );
+  }
+
+  // Add field to the group/section
+  const response = await client.post(
+    `${org}/_apis/process/processes/${processId}/workitemtypes/${workItemTypeRefName}/layout/pages/${pageId}/sections/${groupId}`,
+    {
+      referenceName: fieldReferenceName,
+      order: typeof order === 'number' ? order : parseInt(String(order))
+    },
+    {
+      params: { "api-version": "7.0" },
+      headers: { "Content-Type": "application/json" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * Get team member capacity for a specific sprint
+ */
+async function getSprintCapacity(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { teamMemberId, iterationId, project } = args;
+  const team = args.team || args.teamId || "Default";
+  const targetProject = project || config.project;
+
+  const response = await client.get(
+    `${config.org}/${targetProject}/${team}/_apis/work/teamsettings/iterations/${iterationId}/capacities/${teamMemberId}`,
+    {
+      params: { "api-version": "7.0" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * Update team member capacity for a specific sprint
+ * Upserts capacity record with specified activities and daily capacity
+ */
+async function updateTeamCapacity(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { 
+    teamMemberId, 
+    iterationId, 
+    activities = [], 
+    project 
+  } = args;
+  const team = args.team || args.teamId || "Default";
+  const targetProject = project || config.project;
+
+  const payload = {
+    activities: activities
+  };
+
+  const response = await client.put(
+    `${config.org}/${targetProject}/${team}/_apis/work/teamsettings/iterations/${iterationId}/capacities/${teamMemberId}`,
+    payload,
+    {
+      params: { "api-version": "7.0" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * List team member capacities for a sprint
+ */
+async function listSprintCapacities(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { iterationId, project } = args;
+  const team = args.team || args.teamId || "Default";
+  const targetProject = project || config.project;
+
+  const response = await client.get(
+    `${config.org}/${targetProject}/${team}/_apis/work/teamsettings/iterations/${iterationId}/capacities`,
+    {
+      params: { "api-version": "7.0" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * Link two work items with a specified relationship
+ */
+async function linkWorkItems(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { sourceId, targetId, linkType = "System.LinkTypes.Related", project } = args;
+  const targetProject = project || config.project;
+
+  const payload = [
+    {
+      op: "add",
+      path: "/relations/-",
+      value: {
+        rel: linkType,
+        url: `//${config.org}/${targetProject}/_apis/wit/workItems/${targetId}`
+      }
+    }
+  ];
+
+  const response = await client.patch(
+    `${config.org}/${targetProject}/_apis/wit/workitems/${sourceId}`,
+    payload,
+    {
+      params: { "api-version": "7.0" }
+    }
+  );
+
+  return response.data;
+}
+
 // Command-dispatch registry (Strategy pattern): adding a tool is one line here.
 const TOOL_HANDLERS: Record<string, ToolHandler> = {
   "list-work-items": listWorkItems,
@@ -683,6 +965,14 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
   "create-sprint": createSprint,
   "list-processes": listProcesses,
   "update-project-process": updateProjectProcess,
+  "create-process": createProcess,
+  "add-field-to-work-item-type": addFieldToWorkItemType,
+  "add-group-to-work-item-type": addGroupToWorkItemType,
+  "add-field-to-group": addFieldToGroup,
+  "get-sprint-capacity": getSprintCapacity,
+  "update-team-capacity": updateTeamCapacity,
+  "list-sprint-capacities": listSprintCapacities,
+  "link-work-items": linkWorkItems,
 };
 
 

@@ -1,0 +1,69 @@
+{
+  "sprints": [
+    {
+      "name": "Weekly 2026-03-09",
+      "startDate": "2026-03-09",
+      "finishDate": "2026-03-15"
+    },
+    {
+      "name": "Weekly 2026-03-16",
+      "startDate": "2026-03-16",
+      "finishDate": "2026-03-22"
+    },
+    {
+      "name": "Weekly 2026-03-23",
+      "startDate": "2026-03-23",
+      "finishDate": "2026-03-29"
+    },
+    {
+      "name": "Weekly 2026-03-30",
+      "startDate": "2026-03-30",
+      "finishDate": "2026-04-05"
+    },
+    {
+      "name": "Weekly 2026-04-06",
+      "startDate": "2026-04-06",
+      "finishDate": "2026-04-12"
+    },
+    {
+      "name": "Weekly 2026-04-13",
+      "startDate": "2026-04-13",
+      "finishDate": "2026-04-19"
+    },
+    {
+      "name": "Weekly 2026-04-20",
+      "startDate": "2026-04-20",
+      "finishDate": "2026-04-26"
+    },
+    {
+      "name": "Weekly 2026-04-27",
+      "startDate": "2026-04-27",
+      "finishDate": "2026-05-03"
+    },
+    {
+      "name": "Weekly 2026-05-04",
+      "startDate": "2026-05-04",
+      "finishDate": "2026-05-10"
+    },
+    {
+      "name": "Weekly 2026-05-11",
+      "startDate": "2026-05-11",
+      "finishDate": "2026-05-17"
+    },
+    {
+      "name": "Weekly 2026-05-18",
+      "startDate": "2026-05-18",
+      "finishDate": "2026-05-24"
+    },
+    {
+      "name": "Weekly 2026-05-25",
+      "startDate": "2026-05-25",
+      "finishDate": "2026-05-31"
+    },
+    {
+      "name": "Weekly 2026-06-01",
+      "startDate": "2026-06-01",
+      "finishDate": "2026-06-07"
+    }
+  ]
+}

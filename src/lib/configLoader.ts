@@ -101,46 +101,70 @@ class JsonConfigurationSource implements ConfigurationSource {
     }
   }
 
-  async loadUsers(): Promise<Map<string, User>> {
-    const usersData = JSON.parse(
-      fs.readFileSync(path.join(this.configDir, "users.json"), "utf8")
+  private readJsonFromCandidates(candidates: string[]): any {
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        return JSON.parse(fs.readFileSync(candidate, "utf8"));
+      }
+    }
+
+    throw new Error(
+      `None of the configuration files were found: ${candidates.join(", ")}`
     );
+  }
+
+  async loadUsers(): Promise<Map<string, User>> {
+    const usersData = this.readJsonFromCandidates([
+      path.join(this.configDir, "users.json"),
+      path.join(this.configDir, "users.json.sample"),
+      path.join(this.rootDir, "users.json"),
+      path.join(this.rootDir, "users.json.sample"),
+    ]);
     return new Map<string, User>(
       usersData.users.map((u: User) => [u.userId, u])
     );
   }
 
   async loadRoles(): Promise<Map<string, Role>> {
-    const rolesData = JSON.parse(
-      fs.readFileSync(path.join(this.configDir, "roles.json"), "utf8")
-    );
+    const rolesData = this.readJsonFromCandidates([
+      path.join(this.configDir, "roles.json"),
+      path.join(this.configDir, "roles.json.sample"),
+      path.join(this.rootDir, "roles.json"),
+      path.join(this.rootDir, "roles.json.sample"),
+    ]);
     return new Map<string, Role>(
       rolesData.roles.map((r: Role) => [r.roleId, r])
     );
   }
 
   async loadCapacity(): Promise<Map<string, CapacityRecord>> {
-    const capacityData = JSON.parse(
-      fs.readFileSync(path.join(this.configDir, "capacity.json"), "utf8")
-    );
+    const capacityData = this.readJsonFromCandidates([
+      path.join(this.configDir, "capacity.json"),
+      path.join(this.configDir, "capacity.json.sample"),
+      path.join(this.rootDir, "capacity.json"),
+      path.join(this.rootDir, "capacity", "capacity.json"),
+    ]);
     return new Map<string, CapacityRecord>(
       capacityData.capacity.map((c: CapacityRecord) => [c.userId, c])
     );
   }
 
   async loadProjects(): Promise<Map<string, Project>> {
-    const projectsData = JSON.parse(
-      fs.readFileSync(path.join(this.configDir, "projects.json"), "utf8")
-    );
+    const projectsData = this.readJsonFromCandidates([
+      path.join(this.configDir, "projects.json"),
+      path.join(this.configDir, "projects.json.sample"),
+      path.join(this.rootDir, "projects.json"),
+    ]);
     return new Map<string, Project>(
       projectsData.projects.map((p: Project) => [p.projectId, p])
     );
   }
 
   async loadCredentials(): Promise<Map<string, Credential>> {
-    const credentialsData = JSON.parse(
-      fs.readFileSync(path.join(this.rootDir, "users.credentials.json"), "utf8")
-    );
+    const credentialsData = this.readJsonFromCandidates([
+      path.join(this.rootDir, "users.credentials.json"),
+      path.join(this.rootDir, "users.credentials.json.sample"),
+    ]);
     return new Map<string, Credential>(
       credentialsData.credentials.map((c: Credential) => [c.userId, c])
     );
@@ -268,8 +292,6 @@ export function loadConfiguration() {
   
   // JSON mode: synchronous loading
   if (mode === "json") {
-    const source = new JsonConfigurationSource();
-    
     try {
       // Synchronous loader for JSON
       const currentDir = process.cwd();
@@ -280,42 +302,63 @@ export function loadConfiguration() {
         ? path.resolve(currentDir, '../..')
         : currentDir;
 
+      const readJsonSync = (candidates: string[]) => {
+        for (const candidate of candidates) {
+          if (fs.existsSync(candidate)) {
+            return JSON.parse(fs.readFileSync(candidate, "utf8"));
+          }
+        }
+        throw new Error(`None of the configuration files were found: ${candidates.join(", ")}`);
+      };
+
       // Load users
-      const usersData = JSON.parse(
-        fs.readFileSync(path.join(configDir, "users.json"), "utf8")
-      );
+      const usersData = readJsonSync([
+        path.join(configDir, "users.json"),
+        path.join(configDir, "users.json.sample"),
+        path.join(rootDir, "users.json"),
+        path.join(rootDir, "users.json.sample"),
+      ]);
       const users = new Map<string, User>(
         usersData.users.map((u: User) => [u.userId, u])
       );
 
       // Load roles
-      const rolesData = JSON.parse(
-        fs.readFileSync(path.join(configDir, "roles.json"), "utf8")
-      );
+      const rolesData = readJsonSync([
+        path.join(configDir, "roles.json"),
+        path.join(configDir, "roles.json.sample"),
+        path.join(rootDir, "roles.json"),
+        path.join(rootDir, "roles.json.sample"),
+      ]);
       const roles = new Map<string, Role>(
         rolesData.roles.map((r: Role) => [r.roleId, r])
       );
 
       // Load capacity
-      const capacityData = JSON.parse(
-        fs.readFileSync(path.join(configDir, "capacity.json"), "utf8")
-      );
+      const capacityData = readJsonSync([
+        path.join(configDir, "capacity.json"),
+        path.join(configDir, "capacity.json.sample"),
+        path.join(rootDir, "capacity.json"),
+        path.join(rootDir, "capacity", "capacity.json"),
+      ]);
       const capacity = new Map<string, CapacityRecord>(
         capacityData.capacity.map((c: CapacityRecord) => [c.userId, c])
       );
 
       // Load projects
-      const projectsData = JSON.parse(
-        fs.readFileSync(path.join(configDir, "projects.json"), "utf8")
-      );
+      const projectsData = readJsonSync([
+        path.join(configDir, "projects.json"),
+        path.join(configDir, "projects.json.sample"),
+        path.join(rootDir, "projects.json"),
+      ]);
       const projects = new Map<string, Project>(
         projectsData.projects.map((p: Project) => [p.projectId, p])
       );
 
       // Load credentials
-      const credentialsData = JSON.parse(
-        fs.readFileSync(path.join(rootDir, "users.credentials.json"), "utf8")
-      );
+      const credentialsData = readJsonSync([
+        path.join(rootDir, "users.credentials.json"),
+        path.join(rootDir, "users.credentials.json.sample"),
+      ]);
       const credentials = new Map<string, Credential>(
         credentialsData.credentials.map((c: Credential) => [c.userId, c])
       );
@@ -603,6 +646,46 @@ export function isPostgresMode(): boolean {
  */
 export function isJsonMode(): boolean {
   return getPersistenceMode() === "json";
+}
+
+/**
+ * Require postgres mode for automation commands
+ * Throws error if not in postgres mode
+ * 
+ * Usage: Called at the start of automation command handlers to enforce
+ * that production automation never falls back to JSON files.
+ * 
+ * @throws {Error} If PERSISTENCE_MODE is not set to "postgres"
+ */
+export function requirePostgresMode(): void {
+  const mode = getPersistenceMode();
+  if (mode !== "postgres") {
+    throw new Error(
+      `Automation command requires PERSISTENCE_MODE=postgres (current: ${mode}). ` +
+      `This ensures all configuration and state comes from Neon MCP, not local JSON files. ` +
+      `Set PERSISTENCE_MODE=postgres to enable automation.`
+    );
+  }
+}
+
+/**
+ * Check Neon MCP connectivity for automation commands
+ * Throws error if MCP is not properly configured
+ * 
+ * @throws {Error} If Neon MCP environment variables are not set
+ */
+export function requireNeonMcpConfigured(): void {
+  const projectId = process.env.NEON_PROJECT_ID;
+  const branchId = process.env.NEON_BRANCH_ID;
+  const apiKey = process.env.NEON_MCP_API_KEY || process.env.NEON_API_KEY;
+  
+  if (!projectId || !branchId || !apiKey) {
+    throw new Error(
+      `Neon MCP is not properly configured. ` +
+      `Required environment variables: NEON_PROJECT_ID, NEON_BRANCH_ID, NEON_MCP_API_KEY. ` +
+      `Please check your .env or environment setup.`
+    );
+  }
 }
 
 /**

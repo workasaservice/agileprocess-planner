@@ -78,7 +78,14 @@ export async function createUserRecord(data: {
   } else {
     // JSON mode: update config file
     const configDir = resolveConfigDir();
-    const usersPath = path.join(configDir, "users.json");
+    const usersPath = ensureWritableJsonFile(
+      path.join(configDir, "users.json"),
+      [
+        path.join(configDir, "users.json.sample"),
+        path.join(resolveRootDir(), "users.json.sample"),
+      ],
+      { users: [] }
+    );
     let usersData = JSON.parse(fs.readFileSync(usersPath, "utf8"));
 
     // Update or add user
@@ -147,7 +154,14 @@ export async function updateUserRecord(
   } else {
     // JSON mode
     const configDir = resolveConfigDir();
-    const usersPath = path.join(configDir, "users.json");
+    const usersPath = ensureWritableJsonFile(
+      path.join(configDir, "users.json"),
+      [
+        path.join(configDir, "users.json.sample"),
+        path.join(resolveRootDir(), "users.json.sample"),
+      ],
+      { users: [] }
+    );
     const usersData = JSON.parse(fs.readFileSync(usersPath, "utf8"));
 
     const userIndex = usersData.users.findIndex(
@@ -182,10 +196,12 @@ export async function createCredentialRecord(data: {
     clearCache();
   } else {
     // JSON mode
-    const rootDir = process.cwd().includes("/dist")
-      ? path.resolve(process.cwd(), "../..")
-      : process.cwd();
-    const credsPath = path.join(rootDir, "users.credentials.json");
+    const rootDir = resolveRootDir();
+    const credsPath = ensureWritableJsonFile(
+      path.join(rootDir, "users.credentials.json"),
+      [path.join(rootDir, "users.credentials.json.sample")],
+      { credentials: [] }
+    );
     let credsData = JSON.parse(fs.readFileSync(credsPath, "utf8"));
 
     const existingIndex = credsData.credentials.findIndex(
@@ -233,7 +249,11 @@ export async function updateCapacityRecord(
   } else {
     // JSON mode
     const configDir = resolveConfigDir();
-    const capacityPath = path.join(configDir, "capacity.json");
+    const capacityPath = ensureWritableJsonFile(
+      path.join(configDir, "capacity.json"),
+      [path.join(configDir, "capacity.json.sample")],
+      { capacity: [] }
+    );
     const capacityData = JSON.parse(fs.readFileSync(capacityPath, "utf8"));
 
     const recordIndex = capacityData.capacity.findIndex(
@@ -276,7 +296,11 @@ export async function addUserToProject(
     const configDir = resolveConfigDir();
 
     // Update projects.json
-    const projectsPath = path.join(configDir, "projects.json");
+    const projectsPath = ensureWritableJsonFile(
+      path.join(configDir, "projects.json"),
+      [path.join(configDir, "projects.json.sample")],
+      { projects: [] }
+    );
     const projectsData = JSON.parse(fs.readFileSync(projectsPath, "utf8"));
     const project = projectsData.projects.find(
       (p: Project) => p.projectId === projectId
@@ -287,7 +311,14 @@ export async function addUserToProject(
     }
 
     // Update users.json
-    const usersPath = path.join(configDir, "users.json");
+    const usersPath = ensureWritableJsonFile(
+      path.join(configDir, "users.json"),
+      [
+        path.join(configDir, "users.json.sample"),
+        path.join(resolveRootDir(), "users.json.sample"),
+      ],
+      { users: [] }
+    );
     const usersData = JSON.parse(fs.readFileSync(usersPath, "utf8"));
     const user = usersData.users.find((u: User) => u.userId === userId);
     if (user && !user.projectIds.includes(projectId)) {
@@ -323,7 +354,11 @@ export async function removeUserFromProject(
     const configDir = resolveConfigDir();
 
     // Update projects.json
-    const projectsPath = path.join(configDir, "projects.json");
+    const projectsPath = ensureWritableJsonFile(
+      path.join(configDir, "projects.json"),
+      [path.join(configDir, "projects.json.sample")],
+      { projects: [] }
+    );
     const projectsData = JSON.parse(fs.readFileSync(projectsPath, "utf8"));
     const project = projectsData.projects.find(
       (p: Project) => p.projectId === projectId
@@ -334,7 +369,14 @@ export async function removeUserFromProject(
     }
 
     // Update users.json
-    const usersPath = path.join(configDir, "users.json");
+    const usersPath = ensureWritableJsonFile(
+      path.join(configDir, "users.json"),
+      [
+        path.join(configDir, "users.json.sample"),
+        path.join(resolveRootDir(), "users.json.sample"),
+      ],
+      { users: [] }
+    );
     const usersData = JSON.parse(fs.readFileSync(usersPath, "utf8"));
     const user = usersData.users.find((u: User) => u.userId === userId);
     if (user) {
@@ -356,7 +398,14 @@ export async function deleteUserRecord(userId: string): Promise<void> {
   } else {
     // JSON mode
     const configDir = resolveConfigDir();
-    const usersPath = path.join(configDir, "users.json");
+    const usersPath = ensureWritableJsonFile(
+      path.join(configDir, "users.json"),
+      [
+        path.join(configDir, "users.json.sample"),
+        path.join(resolveRootDir(), "users.json.sample"),
+      ],
+      { users: [] }
+    );
     const usersData = JSON.parse(fs.readFileSync(usersPath, "utf8"));
 
     usersData.users = usersData.users.filter((u: User) => u.userId !== userId);
@@ -394,7 +443,11 @@ export async function createIterationRecord(data: {
   } else {
     // JSON mode: update projects.json
     const configDir = resolveConfigDir();
-    const projectsPath = path.join(configDir, "projects.json");
+    const projectsPath = ensureWritableJsonFile(
+      path.join(configDir, "projects.json"),
+      [path.join(configDir, "projects.json.sample")],
+      { projects: [] }
+    );
     const projectsData = JSON.parse(fs.readFileSync(projectsPath, "utf8"));
 
     const project = projectsData.projects.find(
@@ -441,6 +494,36 @@ function resolveConfigDir(): string {
     return path.resolve(currentDir, "../../config");
   }
   return path.resolve(currentDir, "config");
+}
+
+function resolveRootDir(): string {
+  const currentDir = process.cwd();
+  if (currentDir.includes("/dist")) {
+    return path.resolve(currentDir, "../..");
+  }
+  return currentDir;
+}
+
+function ensureWritableJsonFile(
+  targetPath: string,
+  sampleCandidates: string[],
+  defaultValue: Record<string, any>
+): string {
+  if (fs.existsSync(targetPath)) {
+    return targetPath;
+  }
+
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+  for (const samplePath of sampleCandidates) {
+    if (fs.existsSync(samplePath)) {
+      fs.copyFileSync(samplePath, targetPath);
+      return targetPath;
+    }
+  }
+
+  fs.writeFileSync(targetPath, JSON.stringify(defaultValue, null, 2));
+  return targetPath;
 }
 
 /**

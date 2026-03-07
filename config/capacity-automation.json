@@ -3,7 +3,7 @@
   "schedule": {
     "startDate": "2026-03-09",
     "endDate": "2026-12-31",
-    "sprintDurationWeeks": 2,
+    "sprintDurationWeeks": 1,
     "workingDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
     "namingTemplate": "Sprint {date}",
     "dateFormat": "YYYY-MM-DD"

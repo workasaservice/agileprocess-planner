@@ -92,7 +92,7 @@ async function createInheritedProcess(
   const result = await mcpClient.callTool("create-process", {
     name,
     description,
-    parentProcessTypeId: baseProcess,
+    parentProcessId: baseProcess,
   });
 
   console.log(`✓ Process created: ${name} (ID: ${result.typeId})`);
@@ -113,13 +113,11 @@ async function addCustomField(
   try {
     await mcpClient.callTool("add-field-to-work-item-type", {
       processId,
-      witRefName: workItemType,
-      referenceName: field.name,
-      name: field.displayName,
-      description: field.description,
-      type: field.type,
-      required: field.isRequired,
-      defaultValue: field.defaultValue,
+      workItemTypeRefName: workItemType,
+      fieldReferenceName: field.name,
+      fieldName: field.displayName,
+      fieldType: field.type,
+      isRequired: field.isRequired,
     });
 
     console.log(`    ✓ Field added: ${field.displayName}`);
@@ -147,11 +145,9 @@ async function configureFieldLayout(
   try {
     await mcpClient.callTool("add-group-to-work-item-type", {
       processId,
-      witRefName: workItemType,
+      workItemTypeRefName: workItemType,
       pageId: layout.section,
-      groupId: layout.group,
-      label: layout.group,
-      order: layout.order,
+      groupName: layout.group,
     });
 
     console.log(`    ✓ Group created: ${layout.group}`);
@@ -168,9 +164,11 @@ async function configureFieldLayout(
     try {
       await mcpClient.callTool("add-field-to-group", {
         processId,
-        witRefName: workItemType,
+        workItemTypeRefName: workItemType,
+        pageId: layout.section,
         groupId: layout.group,
-        referenceName: field.name,
+        fieldReferenceName: field.name,
+        order: field.layoutOrder ?? 0,
       });
 
       console.log(`    ✓ Field added to group: ${field.name}`);
@@ -259,6 +257,30 @@ async function storeConfigInDatabase(
   }
 
   console.log(`✓ Configuration stored in database`);
+}
+
+async function logEffortInitAudit(
+  db: Pool,
+  projectName: string,
+  processId: string,
+  fields: EffortFieldConfig[]
+): Promise<void> {
+  const query = `
+    INSERT INTO planning_audit (
+      correlation_id,
+      project_id,
+      entity_type,
+      action,
+      after_state,
+      mcp_tool_name,
+      created_at
+    ) VALUES (gen_random_uuid(), $1, 'EffortFieldInit', 'init', $2::jsonb, 'create-process', NOW())
+  `;
+
+  await db.query(query, [
+    projectName,
+    JSON.stringify({ processId, fieldCount: fields.length, fields: fields.map((f) => f.name) }),
+  ]);
 }
 
 /**
@@ -355,6 +377,18 @@ export async function initEffortFields(
     organizationUrl,
     projectName
   );
+
+  // Optional: only works when planning_audit table from migration 003 exists.
+  try {
+    await logEffortInitAudit(
+      db,
+      projectName,
+      processId,
+      taskConfig.fields
+    );
+  } catch {
+    // Keep initialization non-blocking if 003 schema is not applied yet.
+  }
 
   console.log("\n✓ Effort tracking fields initialized successfully\n");
 }
