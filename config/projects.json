@@ -1,0 +1,31 @@
+{
+  "projects": [
+    {
+      "projectId": "project-id-1",
+      "projectName": "ProjectName",
+      "projectFullName": "Project Full Name",
+      "organization": "organization-name",
+      "teamId": "team-id-1",
+      "teamName": "Team Name",
+      "members": [
+        "test-user-1"
+      ],
+      "iterations": [
+        {
+          "sprintName": "Sprint 1",
+          "iterationPath": "ProjectName\\Sprint 1",
+          "iterationId": "iteration-id-1",
+          "startDate": "2024-01-01",
+          "finishDate": "2024-01-14"
+        },
+        {
+          "sprintName": "Sprint 999",
+          "iterationPath": "ProjectName\\Sprint 999",
+          "iterationId": "sprint-999",
+          "startDate": "2026-03-01",
+          "finishDate": "2026-03-14"
+        }
+      ]
+    }
+  ]
+}

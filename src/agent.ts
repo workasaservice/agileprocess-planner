@@ -18,7 +18,10 @@ import { createSprintMeetings } from "./handlers/createSprintMeetings";
 import { createSprintMeetingsWithProfiles } from "./handlers/createSprintMeetingsWithProfiles";
 import { createSprintMeetingsFromTemplate } from "./handlers/createSprintMeetingsFromTemplate";
 import { createUnplannedItems } from "./handlers/createUnplannedItems";
+import { planOrganization } from "./handlers/planOrganization";
 import { effortInit, effortSync, effortValidate } from "./handlers/effortTrackingCommands";
+import { createSprintsAndSeed } from "./handlers/createSprintsAndSeed";
+import { reconcileSprintAutomation } from "./handlers/reconcileSprintAutomation";
 
 dotenv.config();
 
@@ -101,6 +104,7 @@ async function routeCommand(
     "plan-backlog": planBacklog,
     "plan-feature": planFeature,
     "plan-sprint": planSprint,
+    "plan-organization": planOrganization,
     "create-users": createUsers,
     "assign-users-to-groups": assignUsersToGroups,
     "assign-users-to-devops-teams": assignUsersToDevOpsTeams,
@@ -112,6 +116,8 @@ async function routeCommand(
     "effort-init": effortInit,
     "effort-sync": effortSync,
     "effort-validate": effortValidate,
+    "create-sprints-and-seed": createSprintsAndSeed,
+    "reconcile-sprint-automation": reconcileSprintAutomation,
   };
 
   // Check if command is registered
@@ -198,6 +204,9 @@ export async function activateAgent(): Promise<any> {
       },
       "plan-sprint": async (input: any) => {
         return await planSprint(input);
+      },
+      "plan-organization": async (input: any) => {
+        return await planOrganization(input);
       },
       "create-users": async (input: any) => {
         return await createUsers(input);

@@ -94,6 +94,30 @@ function createAxiosClient(config: NeonMcpConfig): AxiosInstance {
   });
 }
 
+function sqlLiteral(value: unknown): string {
+  if (value === null || value === undefined) return "NULL";
+  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "NULL";
+  if (typeof value === "boolean") return value ? "TRUE" : "FALSE";
+  if (value instanceof Date) return `'${value.toISOString().replace(/'/g, "''")}'`;
+
+  if (typeof value === "object") {
+    const json = JSON.stringify(value);
+    return `'${json.replace(/'/g, "''")}'`;
+  }
+
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
+function inlineSqlParams(sql: string, params: unknown[]): string {
+  return sql.replace(/\$(\d+)\b/g, (_match, idxText) => {
+    const idx = Number(idxText) - 1;
+    if (idx < 0 || idx >= params.length) {
+      return "NULL";
+    }
+    return sqlLiteral(params[idx]);
+  });
+}
+
 /**
  * Parse Server-Sent Events (SSE) response format.
  * MCP returns responses as SSE with "event: message" and "data: {JSON}".
@@ -154,13 +178,35 @@ export const neonMcpClient = {
 
     const client = createAxiosClient(config);
 
+    // Auto-inject Neon target identifiers for run_sql when omitted by callers.
+    // This keeps handler call sites simple and avoids repeated boilerplate.
+    const finalParams = { ...params };
+    if (tool === "run_sql") {
+      const projectId = process.env.NEON_PROJECT_ID?.trim();
+      const branchId = process.env.NEON_BRANCH_ID?.trim();
+
+      if (projectId && !finalParams.projectId) {
+        finalParams.projectId = projectId;
+      }
+      if (branchId && !finalParams.branchId) {
+        finalParams.branchId = branchId;
+      }
+
+      // Neon MCP run_sql in this environment does not support bound params.
+      // Inline placeholders so existing handler SQL can continue to use $1 style.
+      if (typeof finalParams.sql === "string" && Array.isArray(finalParams.params) && finalParams.params.length > 0) {
+        finalParams.sql = inlineSqlParams(finalParams.sql, finalParams.params as unknown[]);
+        delete finalParams.params;
+      }
+    }
+
     // MCP protocol requires "tools/call" method with tool name wrapped in params
     const call: McpToolCall = {
       jsonrpc: "2.0",
       method: "tools/call",
       params: {
         name: tool,
-        arguments: params
+        arguments: finalParams
       },
       id: Date.now()
     };
@@ -185,6 +231,23 @@ export const neonMcpClient = {
         throw new Error(
           `Neon MCP error (${mcpResponse.error.code}): ${mcpResponse.error.message}`
         );
+      }
+
+      // Neon tool errors may be returned inside tool payload even when JSON-RPC succeeds.
+      if (tool === "run_sql") {
+        const runSqlResult = mcpResponse.result as {
+          isError?: boolean;
+          content?: Array<{ text?: string }>;
+        };
+        const firstText = runSqlResult?.content?.[0]?.text || "";
+        const looksLikeToolError =
+          runSqlResult?.isError ||
+          firstText.startsWith("MCP error") ||
+          firstText.startsWith("NeonDbError:");
+
+        if (looksLikeToolError) {
+          throw new Error(firstText || "Neon MCP run_sql tool error");
+        }
       }
 
       return mcpResponse.result as T;
