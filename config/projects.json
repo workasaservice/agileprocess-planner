@@ -8,7 +8,7 @@
       "teamId": "team-id-1",
       "teamName": "Team Name",
       "members": [
-        "user-id-1"
+        "test-user-1"
       ],
       "iterations": [
         {

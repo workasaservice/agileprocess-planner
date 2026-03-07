@@ -19,16 +19,14 @@ describe('Sprint Capacity Seeding', () => {
   test('requires postgres mode', async () => {
     process.env.PERSISTENCE_MODE = 'json';
     
-    expect(() => {
-      seedSprintCapacity({
-        projectId: 'test-project',
-        teamId: 'Default',
-        sprintId: 'sprint-1',
-        sprintStartDate: new Date('2026-03-15'),
-        sprintEndDate: new Date('2026-03-29'),
-        iterationPath: 'TestProject\\Sprint 1'
-      });
-    }).toThrow('PERSISTENCE_MODE=postgres');
+    await expect(seedSprintCapacity({
+      projectId: 'test-project',
+      teamId: 'Default',
+      sprintId: 'sprint-1',
+      sprintStartDate: new Date('2026-03-15'),
+      sprintEndDate: new Date('2026-03-29'),
+      iterationPath: 'TestProject\\Sprint 1'
+    })).rejects.toThrow('PERSISTENCE_MODE=postgres');
     
     process.env.PERSISTENCE_MODE = 'postgres';
   });
