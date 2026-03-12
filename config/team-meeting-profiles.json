@@ -1,7 +1,6 @@
 {
   "_comment": "Team-specific meeting profiles for sprint automation",
   "_version": "1.0.0",
-  
   "profiles": {
     "scrum-standard": {
       "description": "Standard Scrum ceremonies with individual task assignment",
@@ -42,13 +41,15 @@
         }
       ]
     },
-    
     "role-based-rotation": {
       "description": "Role-based assignments with automatic rotation",
       "taskStructure": "role-based",
       "rotation": {
         "enabled": true,
-        "roles": ["facilitator", "notetaker"],
+        "roles": [
+          "facilitator",
+          "notetaker"
+        ],
         "frequency": "per-sprint"
       },
       "ceremonies": [
@@ -83,7 +84,6 @@
       ]
     }
   },
-  
   "teamAssignments": {
     "MotherOps-Alpha Team": {
       "profileName": "scrum-standard",
@@ -117,7 +117,6 @@
       }
     }
   },
-  
   "rotationState": {
     "MotherOps-Alpha Team": {
       "currentFacilitator": null,

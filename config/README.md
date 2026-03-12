@@ -16,6 +16,16 @@ The configuration system uses a **modular, linked structure** where data is norm
 - **Maintainability** — Changes in one file automatically propagate via ID links
 - **Scalability** — Easy to add new users, roles, or projects
 
+### Sprint Hierarchy Requirement (MotherOps)
+
+For sprint ceremony automation, the required backlog shape per sprint is:
+
+- Parent user story: `Meetings - <SprintName>`
+- Parent user story: `UnPlanned - <SprintName>`
+- Ceremony tasks must be created under `Meetings`
+- Contingency/buffer tasks must be created under `UnPlanned`
+- Avoid leaving ceremony/contingency tasks in `Unparented Items`
+
 ---
 
 ## File Structure

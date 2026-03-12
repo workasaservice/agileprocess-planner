@@ -16,6 +16,7 @@
     "go": "ts-node src/smartCli.ts",
     "dev": "ts-node src/agent.ts",
     "start": "node dist/agent.js",
+    "test-auth": "ts-node scripts/testAuthentication.ts",
     "validate-mcp": "ts-node src/validateMcpConnection.ts",
     "validate-graph-mcp": "ts-node src/validateGraphMcpConnection.ts",
     "test-mcp-protocol": "ts-node src/testMcpProtocol.ts",

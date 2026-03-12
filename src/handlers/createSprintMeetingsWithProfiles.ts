@@ -124,7 +124,7 @@ function getNextInRotation(
 }
 
 /**
- * Create meeting issue (parent work item)
+ * Create meetings user story (parent work item)
  */
 async function createMeetingIssue(
   projectName: string,
@@ -141,7 +141,7 @@ async function createMeetingIssue(
 
   const result = await azureDevOpsMcpClient.callTool("create-work-item", {
     project: projectName,
-    type: "Issue",
+    type: "User Story",
     title: `Meetings - ${sprintName}`,
     description: description,
     iterationPath: iterationPath,
@@ -163,7 +163,7 @@ async function createIndividualTasks(
   estimatedHours: number
 ): Promise<void> {
   for (const member of teamMembers) {
-    await azureDevOpsMcpClient.callTool("create-work-item", {
+    const taskResult: any = await azureDevOpsMcpClient.callTool("create-work-item", {
       project: projectName,
       type: "Task",
       title: `Sprint Meetings - ${member.displayName}`,
@@ -171,8 +171,14 @@ async function createIndividualTasks(
       iterationPath: iterationPath,
       assignedTo: member.userId,
       estimatedHours: estimatedHours,
-      parentId: parentId,
       tags: "meeting; sprint-ceremony",
+    });
+
+    await azureDevOpsMcpClient.callTool("link-work-items", {
+      project: projectName,
+      sourceId: parentId,
+      targetId: taskResult.id,
+      linkType: "System.LinkTypes.Hierarchy-Forward",
     });
   }
 }
@@ -195,7 +201,7 @@ async function createRoleBasedTasks(
   
   // Assign facilitator
   const facilitatorRotation = getNextInRotation(teamMembers, currentIndex, "facilitator");
-  await azureDevOpsMcpClient.callTool("create-work-item", {
+  const facilitatorTask: any = await azureDevOpsMcpClient.callTool("create-work-item", {
     project: projectName,
     type: "Task",
     title: `Sprint Facilitator - ${sprintName}`,
@@ -203,13 +209,19 @@ async function createRoleBasedTasks(
     iterationPath: iterationPath,
     assignedTo: facilitatorRotation.member.userId,
     estimatedHours: estimatedHours,
-    parentId: parentId,
     tags: "meeting; facilitator; sprint-ceremony",
+  });
+
+  await azureDevOpsMcpClient.callTool("link-work-items", {
+    project: projectName,
+    sourceId: parentId,
+    targetId: facilitatorTask.id,
+    linkType: "System.LinkTypes.Hierarchy-Forward",
   });
   
   // Assign note-taker
   const notetakerRotation = getNextInRotation(teamMembers, facilitatorRotation.nextIndex, "notetaker");
-  await azureDevOpsMcpClient.callTool("create-work-item", {
+  const notetakerTask: any = await azureDevOpsMcpClient.callTool("create-work-item", {
     project: projectName,
     type: "Task",
     title: `Sprint Note-taker - ${sprintName}`,
@@ -217,8 +229,14 @@ async function createRoleBasedTasks(
     iterationPath: iterationPath,
     assignedTo: notetakerRotation.member.userId,
     estimatedHours: estimatedHours,
-    parentId: parentId,
     tags: "meeting; notetaker; sprint-ceremony",
+  });
+
+  await azureDevOpsMcpClient.callTool("link-work-items", {
+    project: projectName,
+    sourceId: parentId,
+    targetId: notetakerTask.id,
+    linkType: "System.LinkTypes.Hierarchy-Forward",
   });
   
   // Update rotation state for next sprint
@@ -313,7 +331,7 @@ export async function createSprintMeetingsWithProfiles(options: {
       console.log(`\n  Sprint: ${sprintName}`);
 
       if (dryRun) {
-        console.log(`    [DRY RUN] Would create Issue: Meetings - ${sprintName}`);
+        console.log(`    [DRY RUN] Would create User Story: Meetings - ${sprintName}`);
         totalIssuesPlanned++;
 
         if (profile.taskStructure === "individual-per-member") {
@@ -328,7 +346,7 @@ export async function createSprintMeetingsWithProfiles(options: {
           totalTasksPlanned += 1;
         }
       } else {
-        // Create parent Issue
+        // Create parent User Story
         const issueResult: any = await createMeetingIssue(
           project.projectName,
           iterationPath,
@@ -337,7 +355,7 @@ export async function createSprintMeetingsWithProfiles(options: {
           ["meeting", "sprint-ceremony"]
         );
         const issueId = issueResult.id;
-        console.log(`    ✓ Created Issue ${issueId}: Meetings - ${sprintName}`);
+        console.log(`    ✓ Created User Story ${issueId}: Meetings - ${sprintName}`);
         totalIssuesPlanned++;
 
         // Create tasks based on profile task structure

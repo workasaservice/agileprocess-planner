@@ -1,428 +1,268 @@
 {
-  "total": 42,
-  "created": 42,
+  "total": 26,
+  "created": 26,
   "skipped": 0,
   "errors": 0,
   "results": [
     {
       "project": "MotherOps-Alpha",
       "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-03-09",
-      "startDate": "2026-03-09",
-      "finishDate": "2026-03-20",
+      "name": "TestIteration 001",
+      "startDate": "2026-03-09T00:00:00.000Z",
+      "finishDate": "2026-03-15T00:00:00.000Z",
       "status": "created",
-      "iterationId": "2e5dcba5-baed-4d05-ba8e-0473baff19ba",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-03-09"
+      "iterationId": "38d26fe6-161f-4662-84ff-409cf2590732",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-03-16"
+    },
+    {
+      "project": "MotherOps-Alpha",
+      "team": "MotherOps-Alpha Team",
+      "name": "Sprint 2026-03-16",
+      "startDate": "2026-03-16T00:00:00.000Z",
+      "finishDate": "2026-03-22T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "3d9d3aee-ea50-41e1-92d4-66b7cc21b2b5",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-03-16"
     },
     {
       "project": "MotherOps-Alpha",
       "team": "MotherOps-Alpha Team",
       "name": "Sprint 2026-03-23",
-      "startDate": "2026-03-23",
-      "finishDate": "2026-04-03",
+      "startDate": "2026-03-23T00:00:00.000Z",
+      "finishDate": "2026-03-29T00:00:00.000Z",
       "status": "created",
-      "iterationId": "2aaeb7fc-3e69-42fe-aaca-b5a079705589",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-03-23"
+      "iterationId": "8656e835-b9f1-4040-ac0b-f926b2b48b5a",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-03-23"
+    },
+    {
+      "project": "MotherOps-Alpha",
+      "team": "MotherOps-Alpha Team",
+      "name": "Sprint 2026-03-30",
+      "startDate": "2026-03-30T00:00:00.000Z",
+      "finishDate": "2026-04-05T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "03f3f5e8-32a7-43ee-bd3b-bbfafeac89d3",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-03-30"
     },
     {
       "project": "MotherOps-Alpha",
       "team": "MotherOps-Alpha Team",
       "name": "Sprint 2026-04-06",
-      "startDate": "2026-04-06",
-      "finishDate": "2026-04-17",
+      "startDate": "2026-04-06T00:00:00.000Z",
+      "finishDate": "2026-04-12T00:00:00.000Z",
       "status": "created",
-      "iterationId": "972cd68c-c00e-4c92-98ae-9c7e2956fc03",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-04-06"
+      "iterationId": "276cbfcf-d244-448e-a140-4da330c19222",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-04-06"
+    },
+    {
+      "project": "MotherOps-Alpha",
+      "team": "MotherOps-Alpha Team",
+      "name": "Sprint 2026-04-13",
+      "startDate": "2026-04-13T00:00:00.000Z",
+      "finishDate": "2026-04-19T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "8c1718e8-df8d-4e1a-9472-5c9c4e2911f4",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-04-13"
     },
     {
       "project": "MotherOps-Alpha",
       "team": "MotherOps-Alpha Team",
       "name": "Sprint 2026-04-20",
-      "startDate": "2026-04-20",
-      "finishDate": "2026-05-01",
+      "startDate": "2026-04-20T00:00:00.000Z",
+      "finishDate": "2026-04-26T00:00:00.000Z",
       "status": "created",
-      "iterationId": "f80004d5-81b0-4234-9cc4-82f916d55483",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-04-20"
+      "iterationId": "f97acc7f-32ba-4e62-aff2-2436ea71474c",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-04-20"
+    },
+    {
+      "project": "MotherOps-Alpha",
+      "team": "MotherOps-Alpha Team",
+      "name": "Sprint 2026-04-27",
+      "startDate": "2026-04-27T00:00:00.000Z",
+      "finishDate": "2026-05-03T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "e685e053-debc-4a22-9bab-8fd0ffae0d5c",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-04-27"
     },
     {
       "project": "MotherOps-Alpha",
       "team": "MotherOps-Alpha Team",
       "name": "Sprint 2026-05-04",
-      "startDate": "2026-05-04",
-      "finishDate": "2026-05-15",
+      "startDate": "2026-05-04T00:00:00.000Z",
+      "finishDate": "2026-05-10T00:00:00.000Z",
       "status": "created",
-      "iterationId": "51ba60fa-7387-46f3-b37e-83d367d5efad",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-05-04"
+      "iterationId": "dc29a6a8-aff1-4966-982c-1614abf79f94",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-05-04"
+    },
+    {
+      "project": "MotherOps-Alpha",
+      "team": "MotherOps-Alpha Team",
+      "name": "Sprint 2026-05-11",
+      "startDate": "2026-05-11T00:00:00.000Z",
+      "finishDate": "2026-05-17T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "83b00b19-3d0f-40bf-ac68-138612dccafd",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-05-11"
     },
     {
       "project": "MotherOps-Alpha",
       "team": "MotherOps-Alpha Team",
       "name": "Sprint 2026-05-18",
-      "startDate": "2026-05-18",
-      "finishDate": "2026-05-29",
+      "startDate": "2026-05-18T00:00:00.000Z",
+      "finishDate": "2026-05-24T00:00:00.000Z",
       "status": "created",
-      "iterationId": "9df26834-73dc-4499-8428-cd6506a05a9b",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-05-18"
+      "iterationId": "fe7cd018-95c9-47d6-baaf-ee5ef23cfdf7",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-05-18"
+    },
+    {
+      "project": "MotherOps-Alpha",
+      "team": "MotherOps-Alpha Team",
+      "name": "Sprint 2026-05-25",
+      "startDate": "2026-05-25T00:00:00.000Z",
+      "finishDate": "2026-05-31T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "5acb9b9c-7e64-43c7-8b56-8f7e39a43bd5",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-05-25"
     },
     {
       "project": "MotherOps-Alpha",
       "team": "MotherOps-Alpha Team",
       "name": "Sprint 2026-06-01",
-      "startDate": "2026-06-01",
-      "finishDate": "2026-06-12",
+      "startDate": "2026-06-01T00:00:00.000Z",
+      "finishDate": "2026-06-07T00:00:00.000Z",
       "status": "created",
-      "iterationId": "0263ed62-e0a8-4adf-a554-9ee46e3739ad",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-06-01"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-06-15",
-      "startDate": "2026-06-15",
-      "finishDate": "2026-06-26",
-      "status": "created",
-      "iterationId": "65cfaca9-df2d-43bb-ba48-36f97bc05fd0",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-06-15"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-06-29",
-      "startDate": "2026-06-29",
-      "finishDate": "2026-07-10",
-      "status": "created",
-      "iterationId": "e3d7c9db-61e5-4aec-9d94-b29c88be192c",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-06-29"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-07-13",
-      "startDate": "2026-07-13",
-      "finishDate": "2026-07-24",
-      "status": "created",
-      "iterationId": "49d46f2e-be06-4440-8f78-5668b1f966fd",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-07-13"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-07-27",
-      "startDate": "2026-07-27",
-      "finishDate": "2026-08-07",
-      "status": "created",
-      "iterationId": "85a6db4d-288a-4f2b-a96a-2c93a409027b",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-07-27"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-08-10",
-      "startDate": "2026-08-10",
-      "finishDate": "2026-08-21",
-      "status": "created",
-      "iterationId": "0400070b-3c6a-4190-a524-552d51738286",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-08-10"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-08-24",
-      "startDate": "2026-08-24",
-      "finishDate": "2026-09-04",
-      "status": "created",
-      "iterationId": "9bc5f527-8a64-4f0b-9e14-2c5a9abd3ea9",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-08-24"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-09-07",
-      "startDate": "2026-09-07",
-      "finishDate": "2026-09-18",
-      "status": "created",
-      "iterationId": "16f2089b-0ced-4182-83aa-7e21c71e35a0",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-09-07"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-09-21",
-      "startDate": "2026-09-21",
-      "finishDate": "2026-10-02",
-      "status": "created",
-      "iterationId": "d5cd18bb-9476-4086-baf0-f507fcfcd51f",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-09-21"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-10-05",
-      "startDate": "2026-10-05",
-      "finishDate": "2026-10-16",
-      "status": "created",
-      "iterationId": "b16cdaeb-a574-4065-86ba-6d999d4bd95c",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-10-05"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-10-19",
-      "startDate": "2026-10-19",
-      "finishDate": "2026-10-30",
-      "status": "created",
-      "iterationId": "1a2eff49-9643-423b-9a64-2263a2115764",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-10-19"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-11-02",
-      "startDate": "2026-11-02",
-      "finishDate": "2026-11-13",
-      "status": "created",
-      "iterationId": "e1e524d1-febd-4226-bb0a-4957b7b48120",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-11-02"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-11-16",
-      "startDate": "2026-11-16",
-      "finishDate": "2026-11-27",
-      "status": "created",
-      "iterationId": "0effbd66-685e-46b1-9b7b-f439002d4848",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-11-16"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-11-30",
-      "startDate": "2026-11-30",
-      "finishDate": "2026-12-11",
-      "status": "created",
-      "iterationId": "cd33d3d4-9a06-4ecf-b6b9-ede80a0e5245",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-11-30"
-    },
-    {
-      "project": "MotherOps-Alpha",
-      "team": "MotherOps-Alpha Team",
-      "name": "Sprint 2026-12-14",
-      "startDate": "2026-12-14",
-      "finishDate": "2026-12-25",
-      "status": "created",
-      "iterationId": "006ec16e-1595-43f3-a8d6-8ed0a1c6ac35",
-      "iterationPath": "\\MotherOps-Alpha\\Iteration\\Sprint 2026-12-14"
+      "iterationId": "f7db521c-fbab-4d05-864b-9f71d36dac56",
+      "iterationPath": "MotherOps-Alpha\\Sprint 2026-06-01"
     },
     {
       "project": "MotherOps-Beta",
       "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-03-09",
-      "startDate": "2026-03-09",
-      "finishDate": "2026-03-20",
+      "name": "TestIteration 001",
+      "startDate": "2026-03-09T00:00:00.000Z",
+      "finishDate": "2026-03-15T00:00:00.000Z",
       "status": "created",
-      "iterationId": "6277a69f-2acf-440c-be92-68e877f361bb",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-03-09"
+      "iterationId": "0c54ffb7-c8e6-4a73-9747-977f4573813e",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-03-16"
+    },
+    {
+      "project": "MotherOps-Beta",
+      "team": "MotherOps-Beta Team",
+      "name": "Sprint 2026-03-16",
+      "startDate": "2026-03-16T00:00:00.000Z",
+      "finishDate": "2026-03-22T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "d5d04d5c-3f0c-45a8-b020-e543f565d027",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-03-16"
     },
     {
       "project": "MotherOps-Beta",
       "team": "MotherOps-Beta Team",
       "name": "Sprint 2026-03-23",
-      "startDate": "2026-03-23",
-      "finishDate": "2026-04-03",
+      "startDate": "2026-03-23T00:00:00.000Z",
+      "finishDate": "2026-03-29T00:00:00.000Z",
       "status": "created",
-      "iterationId": "1c0e91e2-75ea-46e7-8bea-d7b3031d5d90",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-03-23"
+      "iterationId": "515c6e1c-b072-4c97-b47a-7d3fab6f1d6d",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-03-23"
+    },
+    {
+      "project": "MotherOps-Beta",
+      "team": "MotherOps-Beta Team",
+      "name": "Sprint 2026-03-30",
+      "startDate": "2026-03-30T00:00:00.000Z",
+      "finishDate": "2026-04-05T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "a870f4cb-9974-4e9f-b516-f6977ffcd2df",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-03-30"
     },
     {
       "project": "MotherOps-Beta",
       "team": "MotherOps-Beta Team",
       "name": "Sprint 2026-04-06",
-      "startDate": "2026-04-06",
-      "finishDate": "2026-04-17",
+      "startDate": "2026-04-06T00:00:00.000Z",
+      "finishDate": "2026-04-12T00:00:00.000Z",
       "status": "created",
-      "iterationId": "ff6de8b6-0c16-49cd-8612-0de15af1ffc8",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-04-06"
+      "iterationId": "2fb2f471-1d5d-4c17-887c-fe054c37bd2f",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-04-06"
+    },
+    {
+      "project": "MotherOps-Beta",
+      "team": "MotherOps-Beta Team",
+      "name": "Sprint 2026-04-13",
+      "startDate": "2026-04-13T00:00:00.000Z",
+      "finishDate": "2026-04-19T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "8f961154-222e-432d-b4a3-5b12f03fe393",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-04-13"
     },
     {
       "project": "MotherOps-Beta",
       "team": "MotherOps-Beta Team",
       "name": "Sprint 2026-04-20",
-      "startDate": "2026-04-20",
-      "finishDate": "2026-05-01",
+      "startDate": "2026-04-20T00:00:00.000Z",
+      "finishDate": "2026-04-26T00:00:00.000Z",
       "status": "created",
-      "iterationId": "c94ba3bb-75fd-4219-9208-58c95aa8529c",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-04-20"
+      "iterationId": "0f2dec23-dcc3-4404-92d1-0b18c9530f9c",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-04-20"
+    },
+    {
+      "project": "MotherOps-Beta",
+      "team": "MotherOps-Beta Team",
+      "name": "Sprint 2026-04-27",
+      "startDate": "2026-04-27T00:00:00.000Z",
+      "finishDate": "2026-05-03T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "47c85fb7-849a-4c1b-9710-3e38365deeba",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-04-27"
     },
     {
       "project": "MotherOps-Beta",
       "team": "MotherOps-Beta Team",
       "name": "Sprint 2026-05-04",
-      "startDate": "2026-05-04",
-      "finishDate": "2026-05-15",
+      "startDate": "2026-05-04T00:00:00.000Z",
+      "finishDate": "2026-05-10T00:00:00.000Z",
       "status": "created",
-      "iterationId": "d6e7ea04-c795-4a3c-9517-826ef1a007d3",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-05-04"
+      "iterationId": "79a2b4c4-73b1-4c14-931c-495f9a56194c",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-05-04"
+    },
+    {
+      "project": "MotherOps-Beta",
+      "team": "MotherOps-Beta Team",
+      "name": "Sprint 2026-05-11",
+      "startDate": "2026-05-11T00:00:00.000Z",
+      "finishDate": "2026-05-17T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "822756e4-2782-4b37-bdb5-91f19a4a9f96",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-05-11"
     },
     {
       "project": "MotherOps-Beta",
       "team": "MotherOps-Beta Team",
       "name": "Sprint 2026-05-18",
-      "startDate": "2026-05-18",
-      "finishDate": "2026-05-29",
+      "startDate": "2026-05-18T00:00:00.000Z",
+      "finishDate": "2026-05-24T00:00:00.000Z",
       "status": "created",
-      "iterationId": "fcabad0f-9ec4-4eda-90c0-0e83951c97c6",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-05-18"
+      "iterationId": "ad07da2e-a297-46e2-a269-8625f75027d8",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-05-18"
+    },
+    {
+      "project": "MotherOps-Beta",
+      "team": "MotherOps-Beta Team",
+      "name": "Sprint 2026-05-25",
+      "startDate": "2026-05-25T00:00:00.000Z",
+      "finishDate": "2026-05-31T00:00:00.000Z",
+      "status": "created",
+      "iterationId": "fccea9f5-66f5-4379-a3c0-13b01c594c82",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-05-25"
     },
     {
       "project": "MotherOps-Beta",
       "team": "MotherOps-Beta Team",
       "name": "Sprint 2026-06-01",
-      "startDate": "2026-06-01",
-      "finishDate": "2026-06-12",
+      "startDate": "2026-06-01T00:00:00.000Z",
+      "finishDate": "2026-06-07T00:00:00.000Z",
       "status": "created",
-      "iterationId": "af3fb71d-73c3-4878-ab63-b6ace116b426",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-06-01"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-06-15",
-      "startDate": "2026-06-15",
-      "finishDate": "2026-06-26",
-      "status": "created",
-      "iterationId": "b231f009-ab68-4c8a-b902-2f9f9a6957d4",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-06-15"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-06-29",
-      "startDate": "2026-06-29",
-      "finishDate": "2026-07-10",
-      "status": "created",
-      "iterationId": "0b4ab4df-4932-4d23-a548-a7f034ca6681",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-06-29"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-07-13",
-      "startDate": "2026-07-13",
-      "finishDate": "2026-07-24",
-      "status": "created",
-      "iterationId": "51cc7523-0786-4192-a145-ca00b37557e3",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-07-13"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-07-27",
-      "startDate": "2026-07-27",
-      "finishDate": "2026-08-07",
-      "status": "created",
-      "iterationId": "02e11d84-ad3d-46ad-958a-1059ca0ba30a",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-07-27"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-08-10",
-      "startDate": "2026-08-10",
-      "finishDate": "2026-08-21",
-      "status": "created",
-      "iterationId": "a769665e-e9b4-4a98-9b2f-1f357f5bceea",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-08-10"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-08-24",
-      "startDate": "2026-08-24",
-      "finishDate": "2026-09-04",
-      "status": "created",
-      "iterationId": "2cd5ac78-f427-46bd-9ad3-571c1fe2dc78",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-08-24"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-09-07",
-      "startDate": "2026-09-07",
-      "finishDate": "2026-09-18",
-      "status": "created",
-      "iterationId": "77fd2391-e398-4021-b94d-f8c223a9b952",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-09-07"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-09-21",
-      "startDate": "2026-09-21",
-      "finishDate": "2026-10-02",
-      "status": "created",
-      "iterationId": "2f52acf1-275f-4903-9622-0b2f22d9a1fa",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-09-21"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-10-05",
-      "startDate": "2026-10-05",
-      "finishDate": "2026-10-16",
-      "status": "created",
-      "iterationId": "b4b8406f-a9dd-4b14-a10b-b874de7641a4",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-10-05"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-10-19",
-      "startDate": "2026-10-19",
-      "finishDate": "2026-10-30",
-      "status": "created",
-      "iterationId": "f3d2c65d-55c0-4312-9efe-46f14fcc4ddd",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-10-19"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-11-02",
-      "startDate": "2026-11-02",
-      "finishDate": "2026-11-13",
-      "status": "created",
-      "iterationId": "1806fa26-d27e-4201-bd8d-7f3f65206ccd",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-11-02"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-11-16",
-      "startDate": "2026-11-16",
-      "finishDate": "2026-11-27",
-      "status": "created",
-      "iterationId": "567d8cb7-05c5-4b7b-ae1b-2aca6e6acca1",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-11-16"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-11-30",
-      "startDate": "2026-11-30",
-      "finishDate": "2026-12-11",
-      "status": "created",
-      "iterationId": "e4d7849b-568b-4bb8-b919-86a5e7d7d9e1",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-11-30"
-    },
-    {
-      "project": "MotherOps-Beta",
-      "team": "MotherOps-Beta Team",
-      "name": "Sprint 2026-12-14",
-      "startDate": "2026-12-14",
-      "finishDate": "2026-12-25",
-      "status": "created",
-      "iterationId": "ca3f2aac-ac0a-46d5-8386-d54f60c3e1c6",
-      "iterationPath": "\\MotherOps-Beta\\Iteration\\Sprint 2026-12-14"
+      "iterationId": "c37f91c4-908a-4ddb-bcbf-d48429de72f6",
+      "iterationPath": "MotherOps-Beta\\Sprint 2026-06-01"
     }
   ]
 }

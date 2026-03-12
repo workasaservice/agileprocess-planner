@@ -84,6 +84,13 @@ These handlers are available for Azure DevOps work items:
 - `create-backlog-items` - Create flat backlog items from JSON
 - `create-sprint-items` - Create sprint-assigned user stories
 
+### Sprint Ceremony Requirement (MotherOps SAFe)
+- Required parent stories per sprint: `Meetings - <SprintName>` and `UnPlanned - <SprintName>`.
+- All ceremony tasks must be children of the `Meetings` parent story.
+- All contingency/buffer tasks must be children of the `UnPlanned` parent story.
+- `Unparented Items` should not contain ceremony or contingency tasks after seeding.
+- Neon-backed defaults for sprint templates should mirror this hierarchy so future automation runs remain consistent.
+
 ### Planning (via AgileProcess Core API)
 - `plan-backlog` - Generate backlog plans from requirements
 - `plan-feature` - Break features into stories/tasks

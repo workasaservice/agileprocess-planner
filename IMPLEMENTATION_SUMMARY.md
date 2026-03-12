@@ -13,6 +13,18 @@
 - **Architecture**: MCP-only + Neon persistence with event sourcing
 - **Ready for**: Integration testing, execution, and metrics collection
 
+## Requirement Update (March 7, 2026)
+
+The sprint ceremony requirement was finalized for MotherOps projects:
+
+- Each sprint must contain exactly two parent user stories:
+  - `Meetings - <SprintName>`
+  - `UnPlanned - <SprintName>`
+- Ceremony tasks (planning/standup/refinement/review/retro) must be children of `Meetings`.
+- Buffer/contingency tasks must be children of `UnPlanned`.
+- Ceremony and contingency tasks must not remain as unparented backlog items.
+- This hierarchy is now a persistence expectation, not a one-time data fix.
+
 ---
 
 ## What Was Delivered
