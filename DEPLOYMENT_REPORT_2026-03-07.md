@@ -5,6 +5,14 @@
 
 ## Deployment Steps Completed
 
+### ✅ 0. Requirement Clarification Captured (Latest)
+- Sprint backlog hierarchy requirement updated:
+  - Parent user story `Meetings - <SprintName>`
+  - Parent user story `UnPlanned - <SprintName>`
+  - Ceremony tasks under `Meetings`
+  - Contingency tasks under `UnPlanned`
+- Goal: prevent ceremony/contingency tasks from appearing as unparented items.
+
 ### ✅ 1. Code Implementation (All 8 Steps)
 - Schema migration file created (`004-sprint-automation-schema.sql`)
 - Configuration enforcement added to `configLoader.ts`
@@ -83,6 +91,7 @@
    - Confirm 4 seeded stories appear in sprint backlog
 4. **Test reconciliation command**: `npm run cli -- reconcile-sprint-automation --project "MotherOps-Alpha" --dry-run`
 5. **Document Azure DevOps project setup** for production environments
+6. **Sync hierarchical sprint templates in Neon** (`sprint_story_templates`) so future automation runs keep the same `Meetings`/`UnPlanned` parent-child structure
 
 ## Test Commands
 

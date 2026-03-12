@@ -1,7 +1,6 @@
 {
   "_comment": "Team-specific profiles for unplanned work automation",
   "_version": "1.0.0",
-  
   "profiles": {
     "scrum-standard": {
       "description": "Standard unplanned work buffer allocation",
@@ -35,7 +34,6 @@
       ]
     }
   },
-  
   "teamAssignments": {
     "MotherOps-Alpha Team": {
       "profileName": "scrum-standard",
@@ -54,21 +52,20 @@
       }
     }
   },
-  
   "bufferAllocationState": {
     "MotherOps-Alpha Team": {
       "lastCalculated": null,
       "currentBufferPercentage": 25,
       "bufferHoursPerMember": 10,
-      "totalTeamBufferHours": null,
-      "lastUpdated": null
+      "totalTeamBufferHours": 1040,
+      "lastUpdated": "2026-03-07T23:53:45.504Z"
     },
     "MotherOps-Beta Team": {
       "lastCalculated": null,
       "currentBufferPercentage": 15,
       "bufferHoursPerMember": 8,
-      "totalTeamBufferHours": null,
-      "lastUpdated": null
+      "totalTeamBufferHours": 936,
+      "lastUpdated": "2026-03-07T23:54:22.950Z"
     }
   }
 }

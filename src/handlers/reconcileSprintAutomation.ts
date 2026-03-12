@@ -24,6 +24,7 @@ import { neonMcpClient } from "../clients/neonMcpClient";
 import { requirePostgresMode, requireNeonMcpConfigured, loadConfigurationAsync } from "../lib/configLoader";
 import { seedSprintCapacity } from "../services/sprintCapacitySeeder";
 import { seedSprintStories } from "../services/sprintStorySeeder";
+import { ensureSprintAutomationPrerequisites } from "../services/sprintAutomationBootstrap";
 
 export interface ReconcileArgs {
   projectId: string;
@@ -51,6 +52,17 @@ interface Sprint {
   startDate: string;
   finishDate: string;
   teamId: string;
+}
+
+function parseBooleanFlag(value: unknown): boolean {
+  if (value === true) {
+    return true;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return normalized === "true" || normalized === "1" || normalized === "yes";
+  }
+  return false;
 }
 
 /**
@@ -275,15 +287,20 @@ export async function reconcileSprintAutomation(input: any): Promise<any> {
   const projectId = input.project || input.projectId;
   const startDate = input["start-date"] || input.startDate;
   const endDate = input["end-date"] || input.endDate;
-  const dryRun = input["dry-run"] === true || input.dryRun === true;
-  const onlyCapacity = input["only-capacity"] === true || input.onlyCapacity === true;
-  const onlyStories = input["only-stories"] === true || input.onlyStories === true;
+  const dryRun = parseBooleanFlag(input["dry-run"]) || parseBooleanFlag(input.dryRun);
+  const onlyCapacity = parseBooleanFlag(input["only-capacity"]) || parseBooleanFlag(input.onlyCapacity);
+  const onlyStories = parseBooleanFlag(input["only-stories"]) || parseBooleanFlag(input.onlyStories);
 
   const args: ReconcileArgs = { projectId, startDate, endDate, dryRun, onlyCapacity, onlyStories };
 
   try {
     // Load configuration async (required for postgres mode)
     await loadConfigurationAsync();
+
+    const bootstrapResult = await ensureSprintAutomationPrerequisites(projectId, undefined, dryRun);
+    if (bootstrapResult.bootstrap.warnings.length > 0) {
+      throw new Error(`Prerequisite bootstrap incomplete: ${bootstrapResult.bootstrap.warnings.join("; ")}`);
+    }
 
     console.log(`[Reconciler] Starting sprint automation reconciliation`);
     console.log(`[Reconciler] Project: ${projectId}`);
@@ -318,20 +335,14 @@ export async function reconcileSprintAutomation(input: any): Promise<any> {
       console.log(`\n[Reconciler] Checking sprint: ${sprint.sprintName}`);
 
       try {
-        const hasSuccessfulRun = await hasSuccessfulSeedRun(sprint.iterationId);
-        
-        if (hasSuccessfulRun) {
-          console.log(`[Reconciler] Sprint already has successful seed run, skipping`);
-          sprintsReconciled++;
-          continue;
-        }
-
         let capacityAdded = false;
         let storiesAdded = false;
+        const hasSuccessfulRun = await hasSuccessfulSeedRun(sprint.iterationId);
 
         // Check and add capacity if needed
+        let hasCapacity = false;
         if (!args.onlyStories) {
-          const hasCapacity = await sprintHasCapacity(args.projectId, sprint.teamId, sprint.iterationId);
+          hasCapacity = await sprintHasCapacity(args.projectId, sprint.teamId, sprint.iterationId);
           
           if (!hasCapacity) {
             console.log(`[Reconciler] Sprint needs capacity seeding`);
@@ -358,8 +369,9 @@ export async function reconcileSprintAutomation(input: any): Promise<any> {
         }
 
         // Check and add stories if needed
+        let hasStories = false;
         if (!args.onlyCapacity) {
-          const hasStories = await sprintHasStories(sprint.iterationPath);
+          hasStories = await sprintHasStories(sprint.iterationPath);
           
           if (!hasStories) {
             console.log(`[Reconciler] Sprint needs story seeding`);
@@ -371,6 +383,7 @@ export async function reconcileSprintAutomation(input: any): Promise<any> {
                 teamId: sprint.teamId,
                 sprintId: sprint.iterationId,
                 iterationPath: sprint.iterationPath,
+                requirementContext: bootstrapResult.requirement,
                 dryRun
               }
             );
@@ -396,6 +409,9 @@ export async function reconcileSprintAutomation(input: any): Promise<any> {
           );
           sprintsReconciled++;
           console.log(`[Reconciler] ✓ Reconciled sprint: ${sprint.sprintName}`);
+        } else if (hasSuccessfulRun && (args.onlyCapacity || hasCapacity) && (args.onlyStories || hasStories)) {
+          sprintsReconciled++;
+          console.log(`[Reconciler] ✓ Sprint already reconciled with successful seed run`);
         } else if (!dryRun) {
           sprintsReconciled++;
           console.log(`[Reconciler] ✓ Sprint complete (no action needed)`);
@@ -456,9 +472,9 @@ export async function handleReconcileSprintAutomation(args: Record<string, strin
     projectId: args.project as string,
     startDate: args.start as string,
     endDate: args.end as string,
-    dryRun: args.dryRun === true || args["dry-run"] === "true",
-    onlyCapacity: args.onlyCapacity === true || args["only-capacity"] === "true",
-    onlyStories: args.onlyStories === true || args["only-stories"] === "true"
+    dryRun: parseBooleanFlag(args.dryRun) || parseBooleanFlag(args["dry-run"]),
+    onlyCapacity: parseBooleanFlag(args.onlyCapacity) || parseBooleanFlag(args["only-capacity"]),
+    onlyStories: parseBooleanFlag(args.onlyStories) || parseBooleanFlag(args["only-stories"])
   });
 
   if (!result.success) {

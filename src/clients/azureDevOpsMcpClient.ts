@@ -31,6 +31,7 @@
 import fs from "fs";
 import path from "path";
 import axios, { AxiosInstance } from "axios";
+import { getAuthorizationHeader, loadAuthConfig, validateAuthConfig } from "../auth/azureDevOpsAuth";
 
 type AzureDevOpsMcpConfig = {
   serverUrl: string;
@@ -75,8 +76,9 @@ export function resolveAzureDevOpsMcpConfig(): AzureDevOpsMcpConfig {
   };
 }
 
-function createAxiosClient(config: AzureDevOpsMcpConfig): AxiosInstance {
-  const encodedToken = Buffer.from(`:${config.token}`).toString("base64");
+async function createAxiosClient(config: AzureDevOpsMcpConfig): Promise<AxiosInstance> {
+  // Get authorization header (supports both PAT and Service Principal)
+  const authHeader = await getAuthorizationHeader();
   
   // Normalize the base URL - remove org if it's already in serverUrl
   let baseURL = config.serverUrl;
@@ -90,7 +92,7 @@ function createAxiosClient(config: AzureDevOpsMcpConfig): AxiosInstance {
   return axios.create({
     baseURL: baseURL,
     headers: {
-      Authorization: `Basic ${encodedToken}`,
+      Authorization: authHeader,
       "Content-Type": "application/json"
     },
     timeout: 30000
@@ -99,22 +101,28 @@ function createAxiosClient(config: AzureDevOpsMcpConfig): AxiosInstance {
 
 export const azureDevOpsMcpClient = {
   isConfigured() {
-    const config = resolveAzureDevOpsMcpConfig();
-    return Boolean(config.serverUrl && config.token);
+    try {
+      const authConfig = loadAuthConfig();
+      validateAuthConfig(authConfig);
+      const config = resolveAzureDevOpsMcpConfig();
+      return Boolean(config.serverUrl);
+    } catch {
+      return false;
+    }
   },
 
   async callTool(tool: string, args: Record<string, unknown>) {
+    // Validate authentication configuration
+    const authConfig = loadAuthConfig();
+    validateAuthConfig(authConfig);
+    
     const config = resolveAzureDevOpsMcpConfig();
     
     if (!config.serverUrl) {
       throw new Error("Azure DevOps MCP server URL is not configured.");
     }
 
-    if (!config.token) {
-      throw new Error("Azure DevOps MCP token is not configured.");
-    }
-
-    const client = createAxiosClient(config);
+    const client = await createAxiosClient(config);
 
     try {
       const handler = TOOL_HANDLERS[tool];
@@ -489,6 +497,74 @@ async function createSprint(
 }
 
 /**
+ * Delete a work item
+ */
+async function deleteWorkItem(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { id, project, hardDelete = true } = args;
+  const targetProject = (project as string) || config.project;
+
+  await client.delete(
+    `${config.org}/${targetProject}/_apis/wit/workitems/${id}`,
+    {
+      params: {
+        "api-version": "7.0",
+        destroy: hardDelete === true
+      }
+    }
+  );
+
+  return {
+    id,
+    deleted: true,
+    hardDelete: hardDelete === true
+  };
+}
+
+/**
+ * Delete an iteration classification node by path/name under Iteration root
+ */
+async function deleteIteration(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { project } = args;
+  const rawPath = (args.path || args.name) as string | undefined;
+  const targetProject = (project as string) || config.project;
+
+  if (!rawPath) {
+    throw new Error("delete-iteration requires either path or name");
+  }
+
+  // Normalize to a path relative to the Iteration root.
+  const trimmed = rawPath.replace(/^\\+/, "");
+  const withoutProjectPrefix = trimmed.replace(new RegExp(`^${targetProject}\\\\`, "i"), "");
+  const relative = withoutProjectPrefix.replace(/^Iteration\\/i, "");
+  const encodedPath = relative
+    .split(/\\+/)
+    .filter(Boolean)
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+
+  await client.delete(
+    `${config.org}/${targetProject}/_apis/wit/classificationnodes/iterations/${encodedPath}`,
+    {
+      params: { "api-version": "7.0" }
+    }
+  );
+
+  return {
+    path: rawPath,
+    normalizedPath: relative,
+    deleted: true
+  };
+}
+
+/**
  * Update effort tracking fields on a work item
  * Supports Original Estimate, Remaining Work, and Completed Work
  */
@@ -842,6 +918,147 @@ async function addFieldToGroup(
 }
 
 /**
+ * Get team members for a project team
+ */
+async function getTeamMembers(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { project, team } = args;
+  const targetProject = project || config.project;
+  const targetTeam = team || "Default";
+
+  const response = await client.get(
+    `${config.org}/_apis/projects/${targetProject}/teams/${targetTeam}/members`,
+    {
+      params: { "api-version": "7.0" }
+    }
+  );
+
+  return response.data;
+}
+
+/**
+ * Add a member to a team
+ */
+async function addTeamMember(
+  client: AxiosInstance,
+  config: AzureDevOpsMcpConfig,
+  args: Record<string, unknown>
+) {
+  const { project, team, memberId } = args;
+  const targetProject = project || config.project;
+  const targetTeam = team || "Default";
+
+  if (!memberId) {
+    throw new Error("memberId is required (user email or identity ID)");
+  }
+
+  const memberRef = String(memberId);
+
+  // 1) Resolve team storage key (GUID) from project teams list.
+  const teamsResponse = await client.get(
+    `${config.org}/_apis/projects/${targetProject}/teams`,
+    { params: { "api-version": "7.0" } }
+  );
+
+  const teams = Array.isArray(teamsResponse.data?.value) ? teamsResponse.data.value : [];
+  const teamMatch = teams.find((t: any) =>
+    String(t?.name || "").toLowerCase() === String(targetTeam).toLowerCase() ||
+    String(t?.id || "").toLowerCase() === String(targetTeam).toLowerCase()
+  );
+
+  if (!teamMatch?.id) {
+    throw new Error(`Team not found for add-team-member: ${String(targetTeam)}`);
+  }
+
+  const teamStorageKey = String(teamMatch.id);
+
+  // 2) Resolve container descriptor for the team.
+  const teamDescriptorResponse = await client.get(
+    `https://vssps.dev.azure.com/${encodeURIComponent(config.org)}/_apis/graph/descriptors/${encodeURIComponent(teamStorageKey)}`,
+    { params: { "api-version": "7.1-preview.1" } }
+  );
+  const containerDescriptor = teamDescriptorResponse.data?.value;
+
+  if (!containerDescriptor) {
+    throw new Error(`Unable to resolve team descriptor for ${String(targetTeam)}`);
+  }
+
+  // 3) Resolve subject descriptor for member.
+  let subjectDescriptor: string | null = null;
+
+  // Treat only graph-style identities as descriptors (e.g., aad.xxx, msa.xxx, vssgp.xxx).
+  const descriptorPrefixes = ["aad.", "msa.", "vssgp.", "svc.", "acs."];
+  if (descriptorPrefixes.some((prefix) => memberRef.toLowerCase().startsWith(prefix))) {
+    subjectDescriptor = memberRef;
+  }
+
+  if (!subjectDescriptor && memberRef.includes("@")) {
+    let continuationToken: string | undefined;
+    for (let i = 0; i < 10; i++) {
+      const usersResponse = await client.get(
+        `https://vssps.dev.azure.com/${encodeURIComponent(config.org)}/_apis/graph/users`,
+        {
+          params: {
+            "api-version": "7.1-preview.1",
+            ...(continuationToken ? { continuationToken } : {})
+          }
+        }
+      );
+
+      const users = Array.isArray(usersResponse.data?.value) ? usersResponse.data.value : [];
+      const match = users.find((u: any) =>
+        String(u?.principalName || "").toLowerCase() === memberRef.toLowerCase() ||
+        String(u?.mailAddress || "").toLowerCase() === memberRef.toLowerCase()
+      );
+
+      if (match?.descriptor) {
+        subjectDescriptor = String(match.descriptor);
+        break;
+      }
+
+      const headerToken = usersResponse.headers?.["x-ms-continuationtoken"];
+      if (!headerToken) {
+        break;
+      }
+      continuationToken = Array.isArray(headerToken) ? headerToken[0] : headerToken;
+    }
+  }
+
+  // Fallback: if GUID provided, resolve descriptor from storage key.
+  if (!subjectDescriptor && /^[0-9a-fA-F-]{36}$/.test(memberRef)) {
+    const descriptorResponse = await client.get(
+      `https://vssps.dev.azure.com/${encodeURIComponent(config.org)}/_apis/graph/descriptors/${encodeURIComponent(memberRef)}`,
+      { params: { "api-version": "7.1-preview.1" } }
+    );
+    subjectDescriptor = descriptorResponse.data?.value || null;
+  }
+
+  if (!subjectDescriptor) {
+    throw new Error(`Unable to resolve member descriptor for ${memberRef}`);
+  }
+
+  // 4) Add membership: subject -> container(team).
+  const membershipResponse = await client.put(
+    `https://vssps.dev.azure.com/${encodeURIComponent(config.org)}/_apis/graph/memberships/${encodeURIComponent(subjectDescriptor)}/${encodeURIComponent(containerDescriptor)}`,
+    {},
+    { params: { "api-version": "7.1-preview.1" } }
+  );
+
+  return {
+    added: true,
+    project: targetProject,
+    team: targetTeam,
+    member: memberRef,
+    subjectDescriptor,
+    containerDescriptor,
+    result: membershipResponse.data
+  };
+}
+
+/**
  * Get team member capacity for a specific sprint
  */
 async function getSprintCapacity(
@@ -876,16 +1093,19 @@ async function updateTeamCapacity(
     teamMemberId, 
     iterationId, 
     activities = [], 
+    daysOff = [],
     project 
   } = args;
   const team = args.team || args.teamId || "Default";
   const targetProject = project || config.project;
 
+  // Azure DevOps API requires full payload including teamMember and daysOff
   const payload = {
-    activities: activities
+    activities: activities,
+    daysOff: daysOff || []
   };
 
-  const response = await client.put(
+  const response = await client.patch(
     `${config.org}/${targetProject}/${team}/_apis/work/teamsettings/iterations/${iterationId}/capacities/${teamMemberId}`,
     payload,
     {
@@ -935,7 +1155,7 @@ async function linkWorkItems(
       path: "/relations/-",
       value: {
         rel: linkType,
-        url: `//${config.org}/${targetProject}/_apis/wit/workItems/${targetId}`
+        url: `${config.serverUrl}${config.org}/${targetProject}/_apis/wit/workItems/${targetId}`
       }
     }
   ];
@@ -944,7 +1164,8 @@ async function linkWorkItems(
     `${config.org}/${targetProject}/_apis/wit/workitems/${sourceId}`,
     payload,
     {
-      params: { "api-version": "7.0" }
+      params: { "api-version": "7.0" },
+      headers: { "Content-Type": "application/json-patch+json" }
     }
   );
 
@@ -956,6 +1177,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
   "list-work-items": listWorkItems,
   "get-work-item": getWorkItem,
   "create-work-item": createWorkItem,
+  "delete-work-item": deleteWorkItem,
   "clone-work-item": cloneWorkItem,
   "update-work-item": updateWorkItem,
   "update-effort-fields": updateEffortFields,
@@ -963,12 +1185,15 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
   "list-sprints": listSprints,
   "get-sprint": getSprint,
   "create-sprint": createSprint,
+  "delete-iteration": deleteIteration,
   "list-processes": listProcesses,
   "update-project-process": updateProjectProcess,
   "create-process": createProcess,
   "add-field-to-work-item-type": addFieldToWorkItemType,
   "add-group-to-work-item-type": addGroupToWorkItemType,
   "add-field-to-group": addFieldToGroup,
+  "get-team-members": getTeamMembers,
+  "add-team-member": addTeamMember,
   "get-sprint-capacity": getSprintCapacity,
   "update-team-capacity": updateTeamCapacity,
   "list-sprint-capacities": listSprintCapacities,

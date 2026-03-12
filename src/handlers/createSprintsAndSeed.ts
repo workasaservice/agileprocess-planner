@@ -24,6 +24,8 @@ import { neonMcpClient } from "../clients/neonMcpClient";
 import { requirePostgresMode, requireNeonMcpConfigured, loadConfigurationAsync } from "../lib/configLoader";
 import { seedSprintCapacity } from "../services/sprintCapacitySeeder";
 import { seedSprintStories } from "../services/sprintStorySeeder";
+import { ensureSprintAutomationPrerequisites } from "../services/sprintAutomationBootstrap";
+import { ensureSprintHierarchy } from "../services/sprintHierarchyService";
 
 export interface CreateSprintsAndSeedArgs {
   projectId: string;
@@ -40,6 +42,25 @@ export interface Sprint {
 
 interface ScheduleConfig {
   sprints: Sprint[];
+}
+
+function parseBooleanFlag(value: unknown): boolean {
+  if (value === true) {
+    return true;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return normalized === "true" || normalized === "1" || normalized === "yes";
+  }
+  return false;
+}
+
+function isIdentityOnlyCapacityIssue(error: string): boolean {
+  const normalized = error.toLowerCase();
+  return (
+    normalized.includes("missing azure_identity_id") ||
+    normalized.includes("no azure identity found")
+  );
 }
 
 /**
@@ -269,7 +290,7 @@ export async function createSprintsAndSeed(input: any): Promise<any> {
   const projectId = input.project || input.projectId;
   const teamName = input.team || input.teamName || "Default";
   const schedule = input.schedule;
-  const dryRun = input["dry-run"] === true || input.dryRun === true;
+  const dryRun = parseBooleanFlag(input["dry-run"]) || parseBooleanFlag(input.dryRun);
 
   const args: CreateSprintsAndSeedArgs = { projectId, teamName, schedule, dryRun };
 
@@ -280,6 +301,14 @@ export async function createSprintsAndSeed(input: any): Promise<any> {
     console.log(`[Orchestration] Starting sprint creation and seeding`);
     console.log(`[Orchestration] Project: ${projectId}`);
     console.log(`[Orchestration] Dry run: ${dryRun ? 'yes' : 'no'}`);
+
+    // Ensure all sprint automation prerequisites exist before processing.
+    const bootstrapResult = await ensureSprintAutomationPrerequisites(projectId, teamName, dryRun);
+    if (bootstrapResult.bootstrap.warnings.length > 0) {
+      throw new Error(`Prerequisite bootstrap incomplete: ${bootstrapResult.bootstrap.warnings.join("; ")}`);
+    }
+
+    const effectiveTeamName = bootstrapResult.teamName;
 
     // Load sprint schedule
     if (!schedule) {
@@ -301,7 +330,7 @@ export async function createSprintsAndSeed(input: any): Promise<any> {
         // Step 1: Create sprint iteration
         const iterationResult = await createSprintIteration(
           projectId,
-          teamName,
+          effectiveTeamName,
           sprint,
           dryRun
         );
@@ -322,17 +351,29 @@ export async function createSprintsAndSeed(input: any): Promise<any> {
         // Step 3: Create seed run record
         const seedRunId = await createSeedRun(
           args.projectId,
-          teamName,
+          effectiveTeamName,
           iterationResult.iterationId,
           iterationResult.iterationPath,
           dryRun
         );
 
+        // Step 3.5: Ensure Epic → Feature hierarchy
+        // For these projects, projectId and projectName are the same (e.g., "MotherOps-Alpha")
+        const hierarchy = await ensureSprintHierarchy({
+          projectId: args.projectId,
+          projectName: args.projectId, // projectId is the project name
+          sprintName: sprint.name,
+          sprintIterationPath: iterationResult.iterationPath,
+          dryRun
+        });
+
+        console.log(`[Orchestration] Hierarchy: Epic ${hierarchy.epicId} → Feature ${hierarchy.featureId}`);
+
         // Step 4: Seed capacity
         const capacityResult = await seedSprintCapacity(
           {
             projectId: args.projectId,
-            teamId: teamName,
+            teamId: effectiveTeamName,
             sprintId: iterationResult.iterationId,
             sprintStartDate: new Date(sprint.startDate),
             sprintEndDate: new Date(sprint.finishDate),
@@ -346,20 +387,28 @@ export async function createSprintsAndSeed(input: any): Promise<any> {
         const storiesResult = await seedSprintStories(
           {
             projectId: args.projectId,
-            teamId: teamName,
+            teamId: effectiveTeamName,
             sprintId: iterationResult.iterationId,
             iterationPath: iterationResult.iterationPath,
+            requirementContext: bootstrapResult.requirement,
+            parentFeatureId: hierarchy.featureId, // Link stories to Feature
             dryRun
           },
           seedRunId
         );
 
+        // Treat identity-missing capacity issues as partial success when stories are fully seeded.
+        const capacityOnlyIdentityIssues =
+          !capacityResult.success &&
+          capacityResult.errors.length > 0 &&
+          capacityResult.errors.every(isIdentityOnlyCapacityIssue);
+
         // Step 6: Update seed run status
-        const overallSuccess = capacityResult.success && storiesResult.success;
+        const overallSuccess = storiesResult.success && (capacityResult.success || capacityOnlyIdentityIssues);
         await updateSeedRunStatus(
           seedRunId,
           overallSuccess ? "completed" : "failed",
-          capacityResult.success,
+          capacityResult.success || capacityOnlyIdentityIssues,
           storiesResult.success,
           overallSuccess ? undefined : "Errors in capacity or story seeding",
           dryRun
@@ -419,7 +468,7 @@ export async function handleCreateSprintsAndSeed(args: Record<string, string | b
     projectId: args.project as string,
     teamName: args.team as string,
     schedule: args.schedule as string,
-    dryRun: args.dryRun === true || args["dry-run"] === "true"
+    dryRun: parseBooleanFlag(args.dryRun) || parseBooleanFlag(args["dry-run"])
   });
 
   if (!result.success) {

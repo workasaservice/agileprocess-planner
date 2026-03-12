@@ -108,7 +108,7 @@ function loadSprintIterations() {
 }
 
 /**
- * Create unplanned work issue (parent work item)
+ * Create unplanned work user story (parent work item)
  */
 async function createUnplannedIssue(
   projectName: string,
@@ -126,7 +126,7 @@ async function createUnplannedIssue(
 
   const result: any = await azureDevOpsMcpClient.callTool("create-work-item", {
     project: projectName,
-    type: "Issue",
+    type: "User Story",
     title: `UnPlanned - ${sprintName}`,
     description: description,
     iterationPath: iterationPath,
@@ -148,7 +148,7 @@ async function createIndividualTasks(
   bufferHours: number
 ): Promise<void> {
   for (const member of teamMembers) {
-    await azureDevOpsMcpClient.callTool("create-work-item", {
+    const taskResult: any = await azureDevOpsMcpClient.callTool("create-work-item", {
       project: projectName,
       type: "Task",
       title: `UnPlanned Capacity - ${member.displayName}`,
@@ -156,8 +156,14 @@ async function createIndividualTasks(
       iterationPath: iterationPath,
       assignedTo: member.userId,
       estimatedHours: bufferHours,
-      parentId: parentId,
       tags: "unplanned; contingency; buffer",
+    });
+
+    await azureDevOpsMcpClient.callTool("link-work-items", {
+      project: projectName,
+      sourceId: parentId,
+      targetId: taskResult.id,
+      linkType: "System.LinkTypes.Hierarchy-Forward",
     });
   }
 }
@@ -265,13 +271,13 @@ export async function createUnplannedItems(options: {
       console.log(`\n  Sprint: ${sprintName} (Buffer: ${bufferPercentage}%)`);
 
       if (dryRun) {
-        console.log(`    [DRY RUN] Would create Issue: UnPlanned - ${sprintName}`);
+        console.log(`    [DRY RUN] Would create User Story: UnPlanned - ${sprintName}`);
         console.log(`    [DRY RUN] Buffer allocation: ${bufferPercentage}% of sprint capacity`);
         console.log(`    [DRY RUN] Would create ${teamMembers.length} capacity tasks (${bufferHours}h per member)`);
         totalIssuesCreated++;
         totalTasksCreated += teamMembers.length;
       } else {
-        // Create parent Issue
+        // Create parent User Story
         const issueResult = await createUnplannedIssue(
           project.projectName,
           iterationPath,
@@ -282,7 +288,7 @@ export async function createUnplannedItems(options: {
         );
 
         const issueId = issueResult.id;
-        console.log(`    ✓ Created Issue ${issueId}: UnPlanned - ${sprintName}`);
+        console.log(`    ✓ Created User Story ${issueId}: UnPlanned - ${sprintName}`);
         totalIssuesCreated++;
 
         // Create individual tasks for each team member
