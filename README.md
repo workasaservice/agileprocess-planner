@@ -10,6 +10,12 @@ AgileProcess Planner agent for turning requirements, features, and sprint goals 
 - **Assigns users to Azure AD security groups**.
 - **Assigns users to Azure DevOps teams**.
 
+# Demo Video
+
+[![Watch the video](./thumbnail.png)](https://send.workasaservice.ai/share/v10vwi2hw4jlwtrq3ig21qi6sscbt8aj)
+
+Link - https://send.workasaservice.ai/share/v10vwi2hw4jlwtrq3ig21qi6sscbt8aj
+
 ## Setup
 1. Install dependencies: `npm install`
 2. Copy and edit environment variables: `cp .env.example .env`
