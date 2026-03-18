@@ -12,9 +12,7 @@ AgileProcess Planner agent for turning requirements, features, and sprint goals 
 
 # Demo Video
 
-[![Watch the video](./thumbnail.png)](https://send.workasaservice.ai/share/v10vwi2hw4jlwtrq3ig21qi6sscbt8aj)
-
-Link - https://send.workasaservice.ai/share/v10vwi2hw4jlwtrq3ig21qi6sscbt8aj
+https://github.com/user-attachments/assets/ced057a5-41ec-492a-8da5-3206b3c6e6d5
 
 ## Setup
 1. Install dependencies: `npm install`
