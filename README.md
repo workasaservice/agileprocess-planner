@@ -14,6 +14,9 @@ AgileProcess Planner agent for turning requirements, features, and sprint goals 
 
 https://github.com/user-attachments/assets/ced057a5-41ec-492a-8da5-3206b3c6e6d5
 
+
+https://send.workasaservice.ai/share/v4a2bvl1o0vufs2sto7m8n483kepuxr3
+
 ## Setup
 1. Install dependencies: `npm install`
 2. Copy and edit environment variables: `cp .env.example .env`
