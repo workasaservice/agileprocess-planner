@@ -32,7 +32,7 @@
   "license": "MIT",
   "description": "AgileProcess Planner agent (AgilePlanner).",
   "dependencies": {
-    "@azure/identity": "^4.13.0",
+    "@azure/identity": "^4.13.1",
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "axios": "^1.13.5",
