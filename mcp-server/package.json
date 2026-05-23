@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "@azure/identity": "^4.0.0",
+    "@azure/identity": "^4.13.1",
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "isomorphic-fetch": "^3.0.0"
   },
